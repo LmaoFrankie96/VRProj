@@ -22,19 +22,20 @@ public class BlinkColorChange : MonoBehaviour
         // Check if eye tracking data is available
         if (VarjoEyeTracking.IsGazeCalibrated())
         {
- 
+           // Debug.Log("Inside gaze function");
             var eyedata1 = VarjoEyeTracking.GetEyeMeasurements();
 
             // Get eye openness values for left and right eyes
             float leftEyeOpenness = eyedata1.leftEyeOpenness;
             float rightEyeOpenness = eyedata1.rightEyeOpenness;
-            
+
 
             // Detect a blink (when both eyes are closed)
-            bool isBlinking = leftEyeOpenness < 0.1f && rightEyeOpenness <0.1f;
+            bool isBlinking = leftEyeOpenness < 0.1f; //&& rightEyeOpenness <0.1f;
 
-            if (isBlinking && !wasBlinking)
+            if (isBlinking)
             {
+                Debug.Log("Inside blink condition");
                 // Check if the user is facing the object
                 if (IsFacingObject())
                 {
