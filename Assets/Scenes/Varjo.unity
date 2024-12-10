@@ -576,6 +576,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1581714799}
   - component: {fileID: 1581714800}
+  - component: {fileID: 1581714801}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -615,6 +616,18 @@ MonoBehaviour:
   customLogPath: C:\Users\PE ERP Lab\Documents\varjo
   printFramerate: 0
   loggingToggleKey: 32
+--- !u!114 &1581714801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581714797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ce821748b3093047a8cd397f2ef35d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1628101113
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,6 +640,7 @@ GameObject:
   - component: {fileID: 1628101116}
   - component: {fileID: 1628101115}
   - component: {fileID: 1628101114}
+  - component: {fileID: 1628101118}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -720,6 +734,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1628101118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1628101113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5768a73ffa8d44a4aaab6494ac7124cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1663086808
 GameObject:
   m_ObjectHideFlags: 0

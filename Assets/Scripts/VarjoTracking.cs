@@ -26,7 +26,8 @@ public class VarjoTracking : MonoBehaviour
     private List<VarjoEyeTracking.GazeData> dataSinceLastUpdate;
     private List<VarjoEyeTracking.EyeMeasurements> eyeMeasurementsSinceLastUpdate;
     private StreamWriter writer = null;
-
+    private bool leftClosed;
+    private bool rightClosed;
     private static readonly string[] ColumnNames = { "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation", "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM", "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio", "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward", "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM", "RightIrisDiameterInMM", "FocusDistance", "FocusStability" };
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
@@ -114,11 +115,34 @@ public class VarjoTracking : MonoBehaviour
                     {
 
                         Debug.Log("Left eye openness: " + leftEyeOpenness);
+                        if (leftEyeOpenness < 0.3f)
+                        {
+
+                            leftClosed = true;
+                        }
+                        else
+                        {
+                            leftClosed = false;
+                        }
                     }
                     if (eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
 
                         Debug.Log("Right eye openness: " + rightEyeOpenness);
+                        if (rightEyeOpenness < 0.3f)
+                        {
+
+                            rightClosed = true;
+                        }
+                        else
+                        {
+                            rightClosed = false;
+                        }
+                    }
+                    if (leftClosed == true && rightClosed == true)
+                    {
+                        Debug.Log("Blinked!");
+                        ChangeColor.Instance.ChangeObjectColor();
                     }
                 }
 
