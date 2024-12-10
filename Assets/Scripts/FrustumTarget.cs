@@ -10,6 +10,7 @@ public class FrustumTarget : MonoBehaviour
     public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
 
     private Renderer objRenderer;
+    private MeshFilter meshFilter;
     private List<InputDevice> devices = new List<InputDevice>();
     private InputDevice device;
     private Eyes eyes;
@@ -36,6 +37,11 @@ public class FrustumTarget : MonoBehaviour
     void Start()
     {
         objRenderer = GetComponent<Renderer>();
+        meshFilter = objRenderer.GetComponent<MeshFilter>();
+        if (meshFilter == null)
+        {
+            Debug.LogError("MeshFilter is missing on the object.");
+        }
     }
 
     public void SetFrustumState(bool inFrustum)
@@ -69,13 +75,11 @@ public class FrustumTarget : MonoBehaviour
 
                         if (leftClosed && rightClosed && IsHeadsetWorn())
                         {
-                            //Debug.Log("Blinked")
-                            // Check if enough time has passed since the last blink
                             if (Time.time - lastBlinkTime >= blinkCooldown)
                             {
                                 lastBlinkTime = Time.time;
                                 Debug.Log("Blinked!");
-                                ChangeColor();
+                                ToggleMesh();
                             }
                         }
                     }
@@ -84,9 +88,76 @@ public class FrustumTarget : MonoBehaviour
         }
     }
 
-    private void ChangeColor()
+    private void ToggleMesh()
     {
-        objRenderer.material.color = Random.ColorHSV();
+        if (meshFilter != null)
+        {
+            // Check the current mesh type and switch to the other type
+            if (meshFilter.sharedMesh.name == "Cube")
+            {
+                ChangeToSphere();
+            }
+            else if (meshFilter.sharedMesh.name == "Sphere")
+            {
+                ChangeToCube();
+            }
+            else
+            {
+                Debug.Log("Unknown mesh type. Not changing.");
+            }
+        }
+        else
+        {
+            Debug.LogError("MeshFilter is missing on the object.");
+        }
+    }
+
+    private void ChangeToSphere()
+    {
+        // Create a temporary GameObject with a sphere
+        GameObject tempSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+
+        // Extract the sphere's Mesh
+        Mesh sphereMesh = tempSphere.GetComponent<MeshFilter>().sharedMesh;
+
+        if (sphereMesh != null)
+        {
+            // Assign the sphere Mesh to this object's MeshFilter
+            meshFilter.mesh = sphereMesh;
+
+            Debug.Log("Object mesh changed to a sphere.");
+        }
+        else
+        {
+            Debug.LogError("Failed to retrieve sphere mesh.");
+        }
+
+        // Destroy the temporary sphere object
+        Destroy(tempSphere);
+    }
+
+    private void ChangeToCube()
+    {
+        // Create a temporary GameObject with a cube
+        GameObject tempCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+        // Extract the cube's Mesh
+        Mesh cubeMesh = tempCube.GetComponent<MeshFilter>().sharedMesh;
+
+        if (cubeMesh != null)
+        {
+            // Assign the cube Mesh to this object's MeshFilter
+            meshFilter.mesh = cubeMesh;
+
+            Debug.Log("Object mesh changed to a cube.");
+        }
+        else
+        {
+            Debug.LogError("Failed to retrieve cube mesh.");
+        }
+
+        // Destroy the temporary cube object
+        Destroy(tempCube);
     }
 
     private bool IsHeadsetWorn()
