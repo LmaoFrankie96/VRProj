@@ -44,13 +44,8 @@ public class FrustumTarget : MonoBehaviour
 
     public void SetFrustumState(bool inFrustum)
     {
-        
-            if (inFrustum)
-                EyeTracking();
-        
-
-        
-        
+        if (inFrustum)
+            EyeTracking();
     }
     private void EyeTracking()
     {

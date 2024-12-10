@@ -32,7 +32,7 @@ public class ZzzLog : MonoBehaviour
 
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(Screen.width - 400, 0, 400, Screen.height));
+        GUILayout.BeginArea(new Rect(Screen.width - 800, 0, 800, Screen.height));
         GUILayout.Label("\n" + string.Join("\n", myLogQueue.ToArray()));
         GUILayout.EndArea();
     }
