@@ -93,6 +93,11 @@ public class VarjoTracking : MonoBehaviour
             }
         }
 
+        EyeTracking();
+    }
+
+    private void EyeTracking() {
+
         // Get gaze data if gaze is allowed and calibrated
         if (VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
         {
@@ -148,10 +153,10 @@ public class VarjoTracking : MonoBehaviour
 
 
             }
+        }
 
         }
-    }
-    void LogGazeData(VarjoEyeTracking.GazeData data, VarjoEyeTracking.EyeMeasurements eyeMeasurements)
+        void LogGazeData(VarjoEyeTracking.GazeData data, VarjoEyeTracking.EyeMeasurements eyeMeasurements)
     {
         string[] logData = new string[23];
 

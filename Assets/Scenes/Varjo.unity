@@ -127,6 +127,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6498723486561618376, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
   m_PrefabInstance: {fileID: 1250224947}
   m_PrefabAsset: {fileID: 0}
+--- !u!20 &330536071 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 7848580198250604103, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
+  m_PrefabInstance: {fileID: 1250224947}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &330536072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -183,6 +188,7 @@ GameObject:
   - component: {fileID: 622119238}
   - component: {fileID: 622119237}
   - component: {fileID: 622119236}
+  - component: {fileID: 622119240}
   m_Layer: 0
   m_Name: Cube (2)
   m_TagString: Untagged
@@ -276,6 +282,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &622119240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622119234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gazeDataSource: 0
 --- !u!1001 &626148870
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -413,6 +432,7 @@ GameObject:
   - component: {fileID: 842184480}
   - component: {fileID: 842184479}
   - component: {fileID: 842184478}
+  - component: {fileID: 842184482}
   m_Layer: 0
   m_Name: Cube (1)
   m_TagString: Untagged
@@ -506,6 +526,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &842184482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 842184476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gazeDataSource: 0
 --- !u!1001 &1250224947
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -575,8 +608,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1581714799}
-  - component: {fileID: 1581714800}
   - component: {fileID: 1581714801}
+  - component: {fileID: 1581714802}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -599,23 +632,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1581714800
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1581714797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c591ddebde6b3e74798ecf07d0acdd16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gazeDataSource: 0
-  useCustomLogPath: 1
-  customLogPath: C:\Users\PE ERP Lab\Documents\varjo
-  printFramerate: 0
-  loggingToggleKey: 32
 --- !u!114 &1581714801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -628,6 +644,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ce821748b3093047a8cd397f2ef35d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1581714802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581714797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e9455c97c7ed34b90b3b5ab6c58861, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 330536071}
+  targets:
+  - {fileID: 1628101118}
+  - {fileID: 842184482}
+  - {fileID: 622119240}
 --- !u!1 &1628101113
 GameObject:
   m_ObjectHideFlags: 0
@@ -743,9 +776,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1628101113}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5768a73ffa8d44a4aaab6494ac7124cd, type: 3}
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gazeDataSource: 0
 --- !u!1 &1663086808
 GameObject:
   m_ObjectHideFlags: 0
