@@ -127,6 +127,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6498723486561618376, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
   m_PrefabInstance: {fileID: 1250224947}
   m_PrefabAsset: {fileID: 0}
+--- !u!20 &330536071 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 7848580198250604103, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
+  m_PrefabInstance: {fileID: 1250224947}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &330536072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,12 +291,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 622119234}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4676a1b27c7eaf748b9f56773e78712e, type: 3}
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectRenderer: {fileID: 622119237}
-  blinkThreshold: 3
-  facingAngleThreshold: 15
+  changedColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1001 &626148870
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -532,12 +535,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 842184476}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4676a1b27c7eaf748b9f56773e78712e, type: 3}
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectRenderer: {fileID: 842184479}
-  blinkThreshold: 3
-  facingAngleThreshold: 15
+  changedColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1001 &1250224947
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -607,6 +608,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1581714799}
+  - component: {fileID: 1581714800}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -629,6 +631,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1581714800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581714797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e9455c97c7ed34b90b3b5ab6c58861, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 330536071}
+  targets:
+  - {fileID: 1628101118}
+  - {fileID: 842184482}
+  - {fileID: 622119240}
 --- !u!1 &1628101113
 GameObject:
   m_ObjectHideFlags: 0
@@ -744,12 +763,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1628101113}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4676a1b27c7eaf748b9f56773e78712e, type: 3}
+  m_Script: {fileID: 11500000, guid: c6fead3052eaef8409a211353a685fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectRenderer: {fileID: 1628101115}
-  blinkThreshold: 3
-  facingAngleThreshold: 15
+  changedColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &1663086808
 GameObject:
   m_ObjectHideFlags: 0

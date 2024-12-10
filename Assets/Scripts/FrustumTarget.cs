@@ -16,7 +16,29 @@ public class FrustumTarget : MonoBehaviour
 
     public void SetFrustumState(bool inFrustum)
     {
-        if (inFrustum)
+        // Check if eye tracking data is available
+        if (VarjoEyeTracking.IsGazeCalibrated())
+        {
+            // Debug.Log("Inside gaze function");
+            var eyedata1 = VarjoEyeTracking.GetEyeMeasurements();
+
+            // Get eye openness values for left and right eyes
+            float leftEyeOpenness = eyedata1.leftEyeOpenness;
+            float rightEyeOpenness = eyedata1.rightEyeOpenness;
+
+
+            // Detect a blink (when both eyes are closed)
+            bool isBlinking = leftEyeOpenness < 0.1f && rightEyeOpenness < 0.1f;
+
+            if (isBlinking)
+            {
+                blinkCount++;
+                Debug.Log("Blinked " + blinkCount + " times");
+                ChangeColor();
+
+
+            }
+         /*   if (inFrustum)
         {
             // Check if eye tracking data is available
             if (VarjoEyeTracking.IsGazeCalibrated())
@@ -30,7 +52,7 @@ public class FrustumTarget : MonoBehaviour
 
 
                 // Detect a blink (when both eyes are closed)
-                bool isBlinking = leftEyeOpenness < 0.1f; //&& rightEyeOpenness <0.1f;
+                bool isBlinking = leftEyeOpenness < 0.1f && rightEyeOpenness <0.1f;
 
                 if (isBlinking)
                 {
@@ -39,10 +61,10 @@ public class FrustumTarget : MonoBehaviour
                     ChangeColor();
 
 
-                }
+                }*/
 
 
-            }
+            //}
         }
         /*else
         {

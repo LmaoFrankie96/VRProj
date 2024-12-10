@@ -1,4 +1,5 @@
 using UnityEngine;
+using Varjo.XR;
 
 public class FrustumChecker : MonoBehaviour
 {
@@ -7,7 +8,26 @@ public class FrustumChecker : MonoBehaviour
 
     void Update()
     {
-        CheckFrustum();
+        /*if (VarjoEyeTracking.IsGazeCalibrated())
+        {*/
+            // Debug.Log("Inside gaze function");
+            var eyedata1 = VarjoEyeTracking.GetEyeMeasurements();
+
+            // Get eye openness values for left and right eyes
+            float leftEyeOpenness = eyedata1.leftEyeOpenness;
+            float rightEyeOpenness = eyedata1.rightEyeOpenness;
+            Debug.Log("Openness: " + leftEyeOpenness);
+
+            // Detect a blink (when both eyes are closed)
+            bool isBlinking = leftEyeOpenness < 0.3f; //&& rightEyeOpenness < 0.1f;
+
+            if (isBlinking)
+            {
+                Debug.Log("Blinked!");
+            }
+
+           // CheckFrustum();
+        //}
     }
 
     void CheckFrustum()
