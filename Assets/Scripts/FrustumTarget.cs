@@ -6,22 +6,18 @@ using Varjo.XR;
 
 public class FrustumTarget : MonoBehaviour
 {
-
-    [Header("Gaze data")]
+    [Header("Gaze Data")]
     public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
 
-    //public Color changedColor = Color.red; // Color to change to when looked away
-    private bool hasBeenLookedAt = false; // Tracks if the object has been looked at
-    private bool isInFrustum = false; // Tracks if the object is currently in the frustum
     private Renderer objRenderer;
-    private int blinkCount;
-
     private List<InputDevice> devices = new List<InputDevice>();
     private InputDevice device;
     private Eyes eyes;
     private bool leftClosed;
     private bool rightClosed;
 
+    private float blinkCooldown = 1.5f; // 0.5 seconds cooldown between blinks
+    private float lastBlinkTime = 0;
 
     void GetDevice()
     {
@@ -36,10 +32,10 @@ public class FrustumTarget : MonoBehaviour
             GetDevice();
         }
     }
+
     void Start()
     {
         objRenderer = GetComponent<Renderer>();
-        blinkCount = 0;
     }
 
     public void SetFrustumState(bool inFrustum)
@@ -47,69 +43,55 @@ public class FrustumTarget : MonoBehaviour
         if (inFrustum)
             EyeTracking();
     }
+
     private void EyeTracking()
     {
-
-        // Get gaze data if gaze is allowed and calibrated
+        // Ensure gaze is allowed, calibrated, and the device is valid
         if (VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
         {
-            //Get device if not valid
             if (!device.isValid)
             {
                 GetDevice();
             }
 
-            // Show gaze target
-            // gazeTarget.SetActive(true);
-
             if (gazeDataSource == GazeDataSource.InputSubsystem)
             {
-                // Get data for eye positions, rotations and the fixation point
+                // Get data for eye positions, rotations, and the fixation point
                 if (device.TryGetFeatureValue(CommonUsages.eyesData, out eyes))
                 {
-
-                    if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness))
+                    if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness) &&
+                        eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
+                        Debug.Log($"Left eye openness: {leftEyeOpenness}, Right eye openness: {rightEyeOpenness}");
 
-                        Debug.Log("Left eye openness: " + leftEyeOpenness);
-                        if (leftEyeOpenness < 0.3f)
-                        {
+                        leftClosed = leftEyeOpenness < 0.1f;
+                        rightClosed = rightEyeOpenness < 0.1f;
 
-                            leftClosed = true;
-                        }
-                        else
+                        if (leftClosed && rightClosed && IsHeadsetWorn())
                         {
-                            leftClosed = false;
+                            //Debug.Log("Blinked")
+                            // Check if enough time has passed since the last blink
+                            if (Time.time - lastBlinkTime >= blinkCooldown)
+                            {
+                                lastBlinkTime = Time.time;
+                                Debug.Log("Blinked!");
+                                ChangeColor();
+                            }
                         }
-                    }
-                    if (eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
-                    {
-
-                        Debug.Log("Right eye openness: " + rightEyeOpenness);
-                        if (rightEyeOpenness < 0.3f)
-                        {
-
-                            rightClosed = true;
-                        }
-                        else
-                        {
-                            rightClosed = false;
-                        }
-                    }
-                    if (leftClosed == true && rightClosed == true)
-                    {
-                        Debug.Log("Blinked!");
-                        ChangeColor();
                     }
                 }
-
-
             }
         }
-
     }
+
     private void ChangeColor()
     {
         objRenderer.material.color = Random.ColorHSV();
+    }
+
+    private bool IsHeadsetWorn()
+    {
+        // Example: Use a combination of eye calibration and valid gaze data
+        return VarjoEyeTracking.IsGazeCalibrated() && device.isValid;
     }
 }
