@@ -1,10 +1,11 @@
 using UnityEngine;
-using Varjo.XR;
+
 
 public class FrustumChecker : MonoBehaviour
 {
     public Camera playerCamera; // Assign the camera in the Inspector
-    public FrustumTarget[] targets; // Drag and drop all target objects here
+    //public FrustumTarget[] targets; // Drag and drop all target objects here
+    public InvertPainting[] targets;
 
     void Update()
     {
@@ -19,7 +20,7 @@ public class FrustumChecker : MonoBehaviour
         // Get the frustum planes from the camera
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(playerCamera);
 
-        foreach (FrustumTarget target in targets)
+        foreach (InvertPainting target in targets)
         {
             if (target != null)
             {
