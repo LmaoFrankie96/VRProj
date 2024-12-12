@@ -3433,19 +3433,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.328
+      value: -0.574
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.352
+      value: 0.36
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.164
+      value: -1.943
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.70710653
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalRotation.x
@@ -3453,7 +3453,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.70710707
+      value: 0.0000008493661
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalRotation.z
@@ -3465,7 +3465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1342446274262481430, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -3495,9 +3495,13 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4379662639314313334, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
+      propertyPath: m_TrackingType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5859988952917052159, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.185
+      value: -0.415
       objectReference: {fileID: 0}
     - target: {fileID: 8728893569508818819, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
       propertyPath: m_Name
