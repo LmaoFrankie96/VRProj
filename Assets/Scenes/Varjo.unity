@@ -620,7 +620,7 @@ GameObject:
   - component: {fileID: 171472938}
   - component: {fileID: 171472940}
   m_Layer: 0
-  m_Name: Image
+  m_Name: Image3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3374,7 +3374,7 @@ GameObject:
   - component: {fileID: 1217841363}
   - component: {fileID: 1217841365}
   m_Layer: 0
-  m_Name: Image
+  m_Name: Image2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4758,11 +4758,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCamera: {fileID: 330536076}
-  targets:
+  paintings:
   - {fileID: 1676428927}
   - {fileID: 1217841365}
   - {fileID: 171472940}
   - {fileID: 2046886607}
+  hats:
+  - {fileID: 7997302723426900200}
 --- !u!1 &1585188127
 GameObject:
   m_ObjectHideFlags: 0
@@ -5176,7 +5178,7 @@ GameObject:
   - component: {fileID: 1676428925}
   - component: {fileID: 1676428927}
   m_Layer: 0
-  m_Name: Image
+  m_Name: Image1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6484,7 +6486,7 @@ GameObject:
   - component: {fileID: 2046886605}
   - component: {fileID: 2046886607}
   m_Layer: 0
-  m_Name: Image
+  m_Name: Image4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17678,7 +17680,7 @@ Transform:
   m_GameObject: {fileID: 8621600353586752198}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.27, y: -1.4698, z: -0.202}
+  m_LocalPosition: {x: 2.826, y: -1.4759, z: 0.946}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18530,6 +18532,7 @@ GameObject:
   - component: {fileID: 7877363460003108984}
   - component: {fileID: 1156981617167488536}
   - component: {fileID: 3747292935680504054}
+  - component: {fileID: 7997302723426900200}
   m_Layer: 0
   m_Name: Hat4
   m_TagString: Untagged
@@ -18537,6 +18540,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &7997302723426900200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7997302723426900199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31204209cd534ff4ebe91fd922a7f19d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gazeDataSource: 0
+  originalMaterial: {fileID: 2100000, guid: 809aa5af4003a5340a9ab7b3b8a228b6, type: 2}
+  newMaterial: {fileID: 2100000, guid: 04d5fc6d9d5a1154e816234852d08063, type: 2}
 --- !u!1001 &8049863430071843947
 PrefabInstance:
   m_ObjectHideFlags: 0
