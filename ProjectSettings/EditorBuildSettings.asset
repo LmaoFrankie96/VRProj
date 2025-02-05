@@ -9,6 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Varjo.unity
     guid: 0b3d32c36d1f48e47910c7c16abc24bc
   m_configObjects:
+    Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: 1cc990888b4bd474a858b3148b700e2c, type: 2}
     Varjo.XR.Settings: {fileID: 11400000, guid: 38b2f2e75e5812f499ddd31ab7df3a83, type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 172ec73097d53c148afb682c08f587b5, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1e8150ff7c5f340448c7c754ad1e89f3, type: 2}
