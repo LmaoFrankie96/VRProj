@@ -2113,6 +2113,40 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 499052511}
   m_Mesh: {fileID: -8943856950406831701, guid: 88a3aae37a7c3ed4ab7aeb2e1d952f31, type: 3}
+--- !u!1 &504077955
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 504077956}
+  m_Layer: 0
+  m_Name: Positions
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &504077956
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 504077955}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2129703087}
+  - {fileID: 1534055535}
+  - {fileID: 1283911334}
+  m_Father: {fileID: 3924788585066126827}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &523440985
 GameObject:
   m_ObjectHideFlags: 0
@@ -3427,6 +3461,7 @@ GameObject:
   - component: {fileID: 1151849944}
   - component: {fileID: 1151849946}
   - component: {fileID: 1151849945}
+  - component: {fileID: 1151849947}
   m_Layer: 0
   m_Name: Vase
   m_TagString: Untagged
@@ -3499,6 +3534,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1151849943}
   m_Mesh: {fileID: -9116008594841340559, guid: ed273e8bc4d48694a9c1bd4e0831a2fd, type: 3}
+--- !u!114 &1151849947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151849943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78905e8fd70b7024d9d0394a4886de2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gazeDataSource: 0
+  originalPosition: {fileID: 2129703087}
+  position1: {fileID: 1534055535}
+  position2: {fileID: 1283911334}
 --- !u!1 &1168855065
 GameObject:
   m_ObjectHideFlags: 0
@@ -3942,6 +3993,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1443697313815915369, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
   m_PrefabInstance: {fileID: 1250224947}
   m_PrefabAsset: {fileID: 0}
+--- !u!20 &1250224950 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 7848580198250604103, guid: 6e021f3eccd603c46b52912158a72d4c, type: 3}
+  m_PrefabInstance: {fileID: 1250224947}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1261793497
 GameObject:
   m_ObjectHideFlags: 0
@@ -4110,6 +4166,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3475118261464492563, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
   m_PrefabInstance: {fileID: 1274527623}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1283911333
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1283911334}
+  m_Layer: 0
+  m_Name: VaseNewPos2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1283911334
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283911333}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.6957, y: 0.8809, z: -1.1554}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 504077956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1291471360
 GameObject:
   m_ObjectHideFlags: 0
@@ -5115,6 +5202,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1513986417}
   m_Mesh: {fileID: 4300004, guid: f971fb17c1faf124ab6fa78d9aa66a92, type: 3}
+--- !u!1 &1534055534
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1534055535}
+  m_Layer: 0
+  m_Name: VaseNewPos1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1534055535
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1534055534}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.582, y: -0.7847, z: 1.922}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 504077956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1561771082
 GameObject:
   m_ObjectHideFlags: 0
@@ -5159,6 +5277,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1581714799}
   - component: {fileID: 1581714801}
+  - component: {fileID: 1581714802}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -5193,6 +5312,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ce821748b3093047a8cd397f2ef35d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1581714802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581714797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6e9455c97c7ed34b90b3b5ab6c58861, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCamera: {fileID: 1250224950}
+  vase: {fileID: 1151849947}
 --- !u!1 &1585188127
 GameObject:
   m_ObjectHideFlags: 0
@@ -7226,6 +7359,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2117316283}
   m_Mesh: {fileID: 4300010, guid: f971fb17c1faf124ab6fa78d9aa66a92, type: 3}
+--- !u!1 &2129703086
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2129703087}
+  m_Layer: 0
+  m_Name: VaseOriginal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2129703087
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2129703086}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.077, y: -1.1147, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 504077956}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1123693853643666
 GameObject:
   m_ObjectHideFlags: 0
@@ -12898,6 +13062,7 @@ Transform:
   - {fileID: 1867680588014652878}
   - {fileID: 3830833344066694771}
   - {fileID: 7237748065246037252}
+  - {fileID: 504077956}
   m_Father: {fileID: 1889972536}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3959700216268682829
