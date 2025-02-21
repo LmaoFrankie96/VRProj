@@ -14,4 +14,13 @@ public class SceneManager : MonoBehaviour
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene("Experiment 2");  
     }
+
+    public void LoadPractice1()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("PracticeTask_1");
+    }
+    public void LoadPractice2()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("PracticeTask_2");
+    }
 }
