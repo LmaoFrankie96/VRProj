@@ -6,7 +6,7 @@ public class FrustumChecker : MonoBehaviour
    /* public InvertPainting[] paintings;
     public HatColor[] hats;*/
     public VasePositionChanger vase; // Add this line
-
+    //public BlinkRateCalculator blinkRateCalculator;
     void Update()
     {
         CheckFrustum();
@@ -18,7 +18,8 @@ public class FrustumChecker : MonoBehaviour
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(playerCamera);
         /*InvertPaint(frustumPlanes);
         ChangeHatColor(frustumPlanes);*/
-        ChangeVasePosition(frustumPlanes); // Add this line
+        ChangeVasePosition(frustumPlanes);
+        //CalculateAverageBlinkRate(frustumPlanes);
     }
 
     /*private void InvertPaint(Plane[] frustumPlanes)
@@ -65,7 +66,21 @@ public class FrustumChecker : MonoBehaviour
                 // Check if the vase's bounds are inside the frustum
                 bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, vaseRenderer.bounds);
                 vase.SetFrustumState(isInFrustum);
+                //blinkRateCalculator.SetFrustumState(isInFrustum);
             }
         }
     }
+    /*private void CalculateAverageBlinkRate(Plane[] frustumPlanes) // Add this method
+    {
+        if (vase != null)
+        {
+            Renderer vaseRenderer = vase.GetComponent<Renderer>();
+            if (vaseRenderer != null)
+            {
+                // Check if the vase's bounds are inside the frustum
+                bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, vaseRenderer.bounds);
+                blinkRateCalculator.SetFrustumState(isInFrustum);
+            }
+        }
+    }*/
 }

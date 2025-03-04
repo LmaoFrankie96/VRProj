@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +18,8 @@ public class BlinkRateCalculator : MonoBehaviour
     private int blinkCount = 0;
     private string filePath;
     private float startTime;
-
+    private float blinkCooldown = 1.5f;
+    private float lastBlinkTime = 0;
     void GetDevice()
     {
         InputDevices.GetDevicesAtXRNode(XRNode.CenterEye, devices);
@@ -50,9 +50,13 @@ public class BlinkRateCalculator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        EyeTracking();
+       // EyeTracking();
     }
-
+    public void SetFrustumState(bool inFrustum)
+    {
+        if (inFrustum)
+            EyeTracking();
+    }
     private void EyeTracking()
     {
         if (VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
@@ -74,15 +78,21 @@ public class BlinkRateCalculator : MonoBehaviour
 
                         if (leftClosed && rightClosed && IsHeadsetWorn())
                         {
-                            blinkCount++;
-                            Debug.Log("Blinked!");
-                            UpdateBlinkRate();
+                            if (Time.time - lastBlinkTime >= blinkCooldown)
+                            {
+                                lastBlinkTime = Time.time;
+                                blinkCount++;
+                                Debug.Log("Blinked!");
+                                UpdateBlinkRate();
+
+                            }
                         }
                     }
                 }
             }
         }
     }
+                            
 
     private bool IsHeadsetWorn()
     {

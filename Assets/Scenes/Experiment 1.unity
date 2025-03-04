@@ -5561,7 +5561,6 @@ GameObject:
   - component: {fileID: 1581714799}
   - component: {fileID: 1581714801}
   - component: {fileID: 1581714802}
-  - component: {fileID: 1581714803}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -5608,21 +5607,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6e9455c97c7ed34b90b3b5ab6c58861, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 1093855961}
+  playerCamera: {fileID: 5404891226360065561}
   vase: {fileID: 1151849947}
---- !u!114 &1581714803
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1581714797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 578cb2bcc6600e349bc023e718990d81, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gazeDataSource: 0
 --- !u!1 &1585188127
 GameObject:
   m_ObjectHideFlags: 0
