@@ -50,13 +50,13 @@ public class BlinkRateCalculator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       // EyeTracking();
+       EyeTracking();
     }
-    public void SetFrustumState(bool inFrustum)
+    /*public void SetFrustumState(bool inFrustum)
     {
         if (inFrustum)
             EyeTracking();
-    }
+    }*/
     private void EyeTracking()
     {
         if (VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
