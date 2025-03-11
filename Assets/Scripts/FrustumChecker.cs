@@ -3,10 +3,9 @@ using UnityEngine;
 public class FrustumChecker : MonoBehaviour
 {
     public Camera playerCamera; // Assign the camera in the Inspector
-   /* public InvertPainting[] paintings;
-    public HatColor[] hats;*/
-    public VasePositionChanger vase; // Add this line
-    //public BlinkRateCalculator blinkRateCalculator;
+    public GameObject distractorObject; // Reference to the distractor object
+    public ExperimentManager experimentManager; // Reference to the ExperimentManager to notify about frustum status
+
     void Update()
     {
         CheckFrustum();
@@ -16,71 +15,13 @@ public class FrustumChecker : MonoBehaviour
     {
         // Get the frustum planes from the camera
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(playerCamera);
-        /*InvertPaint(frustumPlanes);
-        ChangeHatColor(frustumPlanes);*/
-        ChangeVasePosition(frustumPlanes);
-        //CalculateAverageBlinkRate(frustumPlanes);
-    }
 
-    /*private void InvertPaint(Plane[] frustumPlanes)
-    {
-        foreach (InvertPainting target in paintings)
+        // Check if the distractor object is inside the frustum
+        Renderer distractorRenderer = distractorObject.GetComponent<Renderer>();
+        if (distractorRenderer != null)
         {
-            if (target != null)
-            {
-                Renderer targetRenderer = target.GetComponent<Renderer>();
-                if (targetRenderer != null)
-                {
-                    // Check if the target's bounds are inside the frustum
-                    bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, targetRenderer.bounds);
-                    target.SetFrustumState(isInFrustum);
-                }
-            }
+            bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, distractorRenderer.bounds);
+            experimentManager.SetDistractorInFrustum(isInFrustum); // Notify ExperimentManager
         }
     }
-
-    private void ChangeHatColor(Plane[] frustumPlanes)
-    {
-        foreach (HatColor target in hats)
-        {
-            if (target != null)
-            {
-                Renderer targetRenderer = target.GetComponent<Renderer>();
-                if (targetRenderer != null)
-                {
-                    // Check if the target's bounds are inside the frustum
-                    bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, targetRenderer.bounds);
-                    target.SetFrustumState(isInFrustum);
-                }
-            }
-        }
-    }
-*/
-    private void ChangeVasePosition(Plane[] frustumPlanes) // Add this method
-    {
-        if (vase != null)
-        {
-            Renderer vaseRenderer = vase.GetComponent<Renderer>();
-            if (vaseRenderer != null)
-            {
-                // Check if the vase's bounds are inside the frustum
-                bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, vaseRenderer.bounds);
-                vase.SetFrustumState(isInFrustum);
-                //blinkRateCalculator.SetFrustumState(isInFrustum);
-            }
-        }
-    }
-    /*private void CalculateAverageBlinkRate(Plane[] frustumPlanes) // Add this method
-    {
-        if (vase != null)
-        {
-            Renderer vaseRenderer = vase.GetComponent<Renderer>();
-            if (vaseRenderer != null)
-            {
-                // Check if the vase's bounds are inside the frustum
-                bool isInFrustum = GeometryUtility.TestPlanesAABB(frustumPlanes, vaseRenderer.bounds);
-                blinkRateCalculator.SetFrustumState(isInFrustum);
-            }
-        }
-    }*/
 }
