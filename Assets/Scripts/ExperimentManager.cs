@@ -7,6 +7,7 @@ using Varjo.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using System.Linq;
 using UnityEngine.XR;
+using static Varjo.XR.VarjoEyeTracking;
 
 public class ExperimentManager : MonoBehaviour
 {
@@ -129,22 +130,43 @@ public class ExperimentManager : MonoBehaviour
                     if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness) &&
                         eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
-                        leftClosed = leftEyeOpenness < 0.1f;
-                        rightClosed = rightEyeOpenness < 0.1f;
+                        // Retrieve gaze data from Varjo SDK
+                        GazeData gazeData = VarjoEyeTracking.GetGaze(); // Get the most recent gaze data
 
-                        if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
+                        if (gazeData.status == GazeStatus.Valid) // Check if gaze data is valid
                         {
-                            if (Time.time - lastBlinkTime >= blinkCooldown)
+                            Vector3 gazeOrigin = gazeData.gaze.origin;  // Gaze ray origin (position of the eyes)
+                            Vector3 gazeDirection = gazeData.gaze.forward;  // Gaze direction (where the user is looking)
+
+                            // Collect the gaze coordinates, openness data, and additional tracking data
+                            LogEyeTrackingData(gazeOrigin, gazeDirection, leftEyeOpenness, rightEyeOpenness, leftClosed, rightClosed);
+
+                            if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
                             {
-                                lastBlinkTime = Time.time;
-                                Debug.Log("Blinked!");
-                                ChangeDistractorPosition();
+                                if (Time.time - lastBlinkTime >= blinkCooldown)
+                                {
+                                    lastBlinkTime = Time.time;
+                                    Debug.Log("Blinked!");
+                                    ChangeDistractorPosition();
+                                }
                             }
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Gaze data is not valid.");
                         }
                     }
                 }
             }
         }
+    }
+
+
+    // New function to log eye tracking data
+    void LogEyeTrackingData(Vector3 gazeOrigin, Vector3 gazeDirection, float leftEyeOpenness, float rightEyeOpenness, bool leftClosed, bool rightClosed)
+    {
+        string eyeTrackingLog = $"{Time.time},{gazeOrigin.x},{gazeOrigin.y},{gazeOrigin.z},{gazeDirection.x},{gazeDirection.y},{gazeDirection.z},{leftEyeOpenness},{rightEyeOpenness},{leftClosed},{rightClosed}";
+        logData.Add(eyeTrackingLog); // Add this to the logData list
     }
 
     private bool IsHeadsetWorn()
@@ -222,8 +244,11 @@ public class ExperimentManager : MonoBehaviour
 
     void SaveData()
     {
-        logData.Add("Trial,ObjectDetectionTime,DistractorDetected,DistractorDetectionTime");
-        logData.Add(currentTrial + "," + objectDetectionTime + "," + distractorFound + "," + distractorDetectionTime);
+        // Adding the column headers for eye-tracking data
+        logData.Add("Trial,ObjectDetectionTime,DistractorDetected,DistractorDetectionTime,GazeOriginX,GazeOriginY,GazeOriginZ,GazeDirectionX,GazeDirectionY,GazeDirectionZ,LeftEyeOpenness,RightEyeOpenness,LeftClosed,RightClosed");
+
+        // Saving the data for the trial, including the gaze data
+        logData.Add($"{currentTrial},{objectDetectionTime},{distractorFound},{distractorDetectionTime}");
 
         try
         {
