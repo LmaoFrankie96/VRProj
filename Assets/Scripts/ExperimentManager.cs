@@ -8,6 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using System.Linq;
 using UnityEngine.XR;
 using static Varjo.XR.VarjoEyeTracking;
+using System;
 
 public class ExperimentManager : MonoBehaviour
 {
@@ -21,7 +22,12 @@ public class ExperimentManager : MonoBehaviour
     public KeyCode endExperimentKey = KeyCode.Escape; // Key to end the experiment immediately
 
     [Header("Gaze Data")]
-    public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
+    public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem; // Use Input Subsystem
+    
+    [Header("Visualization Transforms")]
+    public Transform fixationPointTransform;
+    public Transform leftEyeTransform;
+    public Transform rightEyeTransform;
 
     [Header("Distractor Positions")]
     public Transform distractorOriginalPosition;
@@ -49,6 +55,16 @@ public class ExperimentManager : MonoBehaviour
 
     private float blinkCooldown = 1.5f; // 1.5 seconds cooldown between blinks
     private float lastBlinkTime = 0;
+
+    // Gaze data logging
+    private StreamWriter writer = null;
+    private bool logging = false;
+    private int gazeDataCount = 0;
+    private float gazeTimer = 0f;
+
+    private static readonly string[] ColumnNames = { "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation", "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM", "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio", "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward", "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM", "RightIrisDiameterInMM", "FocusDistance", "FocusStability" };
+    private const string ValidString = "VALID";
+    private const string InvalidString = "INVALID";
 
     void GetDevice()
     {
@@ -116,7 +132,7 @@ public class ExperimentManager : MonoBehaviour
 
     void EyeTracking()
     {
-        if (VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
+        if (IsGazeAllowed() && IsGazeCalibrated())
         {
             if (!device.isValid)
             {
@@ -127,33 +143,55 @@ public class ExperimentManager : MonoBehaviour
             {
                 if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.eyesData, out eyes))
                 {
+                    // Retrieve eye positions, rotations, and fixation point
+                    if (eyes.TryGetLeftEyePosition(out Vector3 leftEyePosition))
+                    {
+                        leftEyeTransform.localPosition = leftEyePosition;
+                    }
+
+                    if (eyes.TryGetLeftEyeRotation(out Quaternion leftEyeRotation))
+                    {
+                        leftEyeTransform.localRotation = leftEyeRotation;
+                    }
+
+                    if (eyes.TryGetRightEyePosition(out Vector3 rightEyePosition))
+                    {
+                        rightEyeTransform.localPosition = rightEyePosition;
+                    }
+
+                    if (eyes.TryGetRightEyeRotation(out Quaternion rightEyeRotation))
+                    {
+                        rightEyeTransform.localRotation = rightEyeRotation;
+                    }
+
+                    if (eyes.TryGetFixationPoint(out Vector3 fixationPoint))
+                    {
+                        fixationPointTransform.localPosition = fixationPoint;
+                    }
+
+                    // Start logging if not already started
+                    if (!logging)
+                    {
+                        StartLogging();
+                    }
+
+                    // Log gaze data
                     if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness) &&
                         eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
-                        // Retrieve gaze data from Varjo SDK
-                        GazeData gazeData = VarjoEyeTracking.GetGaze(); // Get the most recent gaze data
-
-                        if (gazeData.status == GazeStatus.Valid) // Check if gaze data is valid
+                        LogEyeTrackingData(leftEyeOpenness, rightEyeOpenness);
+                        leftClosed = leftEyeOpenness < 0.1f;
+                        rightClosed = rightEyeOpenness < 0.1f;
+                    }
+                    
+                    // Check for blink and change distractor position if necessary
+                    if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
+                    {
+                        if (Time.time - lastBlinkTime >= blinkCooldown)
                         {
-                            Vector3 gazeOrigin = gazeData.gaze.origin;  // Gaze ray origin (position of the eyes)
-                            Vector3 gazeDirection = gazeData.gaze.forward;  // Gaze direction (where the user is looking)
-
-                            // Collect the gaze coordinates, openness data, and additional tracking data
-                            LogEyeTrackingData(gazeOrigin, gazeDirection, leftEyeOpenness, rightEyeOpenness, leftClosed, rightClosed);
-
-                            if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
-                            {
-                                if (Time.time - lastBlinkTime >= blinkCooldown)
-                                {
-                                    lastBlinkTime = Time.time;
-                                    Debug.Log("Blinked!");
-                                    ChangeDistractorPosition();
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Debug.LogWarning("Gaze data is not valid.");
+                            lastBlinkTime = Time.time;
+                            Debug.Log("Blinked!");
+                            ChangeDistractorPosition();
                         }
                     }
                 }
@@ -161,12 +199,110 @@ public class ExperimentManager : MonoBehaviour
         }
     }
 
-
-    // New function to log eye tracking data
-    void LogEyeTrackingData(Vector3 gazeOrigin, Vector3 gazeDirection, float leftEyeOpenness, float rightEyeOpenness, bool leftClosed, bool rightClosed)
+    void LogEyeTrackingData(float leftEyeOpenness, float rightEyeOpenness)
     {
-        string eyeTrackingLog = $"{Time.time},{gazeOrigin.x},{gazeOrigin.y},{gazeOrigin.z},{gazeDirection.x},{gazeDirection.y},{gazeDirection.z},{leftEyeOpenness},{rightEyeOpenness},{leftClosed},{rightClosed}";
-        logData.Add(eyeTrackingLog); // Add this to the logData list
+        string[] logData = new string[23];
+
+        // Gaze data frame number
+        logData[0] = Time.frameCount.ToString();
+
+        // Gaze data capture time (nanoseconds)
+        logData[1] = (DateTime.Now.Ticks / 100).ToString(); // Simulate capture time
+
+        // Log time (milliseconds)
+        logData[2] = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
+
+        // HMD
+        logData[3] = Camera.main.transform.localPosition.ToString("F3");
+        logData[4] = Camera.main.transform.localRotation.ToString("F3");
+
+        // Combined gaze
+        logData[5] = ValidString; // Assume valid for simplicity
+        logData[6] = eyes.TryGetFixationPoint(out Vector3 fixationPoint) ? fixationPoint.ToString("F3") : "";
+        logData[7] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
+
+        // IPD
+        logData[8] = eyes.TryGetLeftEyePosition(out Vector3 leftEyePosition) && eyes.TryGetRightEyePosition(out Vector3 rightEyePosition)
+            ? Vector3.Distance(leftEyePosition, rightEyePosition).ToString("F3")
+            : "";
+
+        // Left eye
+        logData[9] = ValidString; // Assume valid for simplicity
+        logData[10] = eyes.TryGetLeftEyeRotation(out Quaternion leftEyeRotation) ? leftEyeRotation.ToString("F3") : "";
+        logData[11] = eyes.TryGetLeftEyePosition(out leftEyePosition) ? leftEyePosition.ToString("F3") : "";
+        logData[12] = leftEyeOpenness.ToString("F3"); // Left pupil-iris ratio (simulated)
+        logData[13] = leftEyeOpenness.ToString("F3"); // Left pupil diameter (simulated)
+        logData[14] = leftEyeOpenness.ToString("F3"); // Left iris diameter (simulated)
+
+        // Right eye
+        logData[15] = ValidString; // Assume valid for simplicity
+        logData[16] = eyes.TryGetRightEyeRotation(out Quaternion rightEyeRotation) ? rightEyeRotation.ToString("F3") : "";
+        logData[17] = eyes.TryGetRightEyePosition(out rightEyePosition) ? rightEyePosition.ToString("F3") : "";
+        logData[18] = rightEyeOpenness.ToString("F3"); // Right pupil-iris ratio (simulated)
+        logData[19] = rightEyeOpenness.ToString("F3"); // Right pupil diameter (simulated)
+        logData[20] = rightEyeOpenness.ToString("F3"); // Right iris diameter (simulated)
+
+        // Focus
+        logData[21] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
+        logData[22] = "1.0"; // Focus stability (simulated)
+
+        Log(logData);
+    }
+
+    void Log(string[] values)
+    {
+        if (!logging || writer == null)
+            return;
+
+        string line = "";
+        for (int i = 0; i < values.Length; ++i)
+        {
+            values[i] = values[i].Replace("\r", "").Replace("\n", ""); // Remove new lines so they don't break csv
+            line += values[i] + (i == (values.Length - 1) ? "" : ";"); // Do not add semicolon to last data string
+        }
+        writer.WriteLine(line);
+    }
+
+    void StartLogging()
+    {
+        if (logging)
+        {
+            Debug.LogWarning("Logging was on when StartLogging was called. No new log was started.");
+            return;
+        }
+
+        logging = true;
+
+        string logPath = Path.GetDirectoryName(customFilePath);
+        Directory.CreateDirectory(logPath);
+
+        string fileName = Path.GetFileName(customFilePath);
+        string path = Path.Combine(logPath, fileName);
+
+        writer = new StreamWriter(path);
+
+        Log(ColumnNames);
+        Debug.Log("Log file started at: " + path);
+    }
+
+    void StopLogging()
+    {
+        if (!logging)
+            return;
+
+        if (writer != null)
+        {
+            writer.Flush();
+            writer.Close();
+            writer = null;
+        }
+        logging = false;
+        Debug.Log("Logging ended");
+    }
+
+    void OnApplicationQuit()
+    {
+        StopLogging();
     }
 
     private bool IsHeadsetWorn()
@@ -176,7 +312,7 @@ public class ExperimentManager : MonoBehaviour
 
     private void ChangeDistractorPosition()
     {
-        int randomIndex = Random.Range(0, 2);
+        int randomIndex = UnityEngine.Random.Range(0, 2);
         Transform newPosition = randomIndex == 0 ? distractorPosition1 : distractorPosition2;
         distractorObject.transform.position = newPosition.position;
         distractorObject.transform.rotation = newPosition.rotation;
@@ -238,6 +374,7 @@ public class ExperimentManager : MonoBehaviour
     void EndExperiment()
     {
         experimentEnded = true;
+        StopLogging();
         SaveData();
         Debug.Log("Experiment Ended");
     }
