@@ -62,7 +62,15 @@ public class ExperimentManager : MonoBehaviour
     private int gazeDataCount = 0;
     private float gazeTimer = 0f;
 
-    private static readonly string[] ColumnNames = { "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation", "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM", "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio", "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward", "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM", "RightIrisDiameterInMM", "FocusDistance", "FocusStability" };
+    private static readonly string[] ColumnNames = {
+    "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation",
+    "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM",
+    "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio",
+    "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
+    "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
+    "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
+    "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime"
+};
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
 
@@ -215,13 +223,13 @@ public class ExperimentManager : MonoBehaviour
 
     void LogEyeTrackingData(float leftEyeOpenness, float rightEyeOpenness)
     {
-        string[] logData = new string[23];
+        string[] logData = new string[27]; // Updated size to include trial data
 
         // Gaze data frame number
         logData[0] = Time.frameCount.ToString();
 
         // Gaze data capture time (nanoseconds)
-        logData[1] = (DateTime.Now.Ticks / 100).ToString(); // Simulate capture time
+        logData[1] = (DateTime.Now.Ticks / 100).ToString(); // Simulated capture time
 
         // Log time (milliseconds)
         logData[2] = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
@@ -231,7 +239,7 @@ public class ExperimentManager : MonoBehaviour
         logData[4] = Camera.main.transform.localRotation.ToString("F3");
 
         // Combined gaze
-        logData[5] = ValidString; // Assume valid for simplicity
+        logData[5] = ValidString;
         logData[6] = eyes.TryGetFixationPoint(out Vector3 fixationPoint) ? fixationPoint.ToString("F3") : "";
         logData[7] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
 
@@ -241,27 +249,34 @@ public class ExperimentManager : MonoBehaviour
             : "";
 
         // Left eye
-        logData[9] = ValidString; // Assume valid for simplicity
+        logData[9] = ValidString;
         logData[10] = eyes.TryGetLeftEyeRotation(out Quaternion leftEyeRotation) ? leftEyeRotation.ToString("F3") : "";
         logData[11] = eyes.TryGetLeftEyePosition(out leftEyePosition) ? leftEyePosition.ToString("F3") : "";
-        logData[12] = leftEyeOpenness.ToString("F3"); // Left pupil-iris ratio (simulated)
-        logData[13] = leftEyeOpenness.ToString("F3"); // Left pupil diameter (simulated)
-        logData[14] = leftEyeOpenness.ToString("F3"); // Left iris diameter (simulated)
+        logData[12] = leftEyeOpenness.ToString("F3");
+        logData[13] = leftEyeOpenness.ToString("F3");
+        logData[14] = leftEyeOpenness.ToString("F3");
 
         // Right eye
-        logData[15] = ValidString; // Assume valid for simplicity
+        logData[15] = ValidString;
         logData[16] = eyes.TryGetRightEyeRotation(out Quaternion rightEyeRotation) ? rightEyeRotation.ToString("F3") : "";
         logData[17] = eyes.TryGetRightEyePosition(out rightEyePosition) ? rightEyePosition.ToString("F3") : "";
-        logData[18] = rightEyeOpenness.ToString("F3"); // Right pupil-iris ratio (simulated)
-        logData[19] = rightEyeOpenness.ToString("F3"); // Right pupil diameter (simulated)
-        logData[20] = rightEyeOpenness.ToString("F3"); // Right iris diameter (simulated)
+        logData[18] = rightEyeOpenness.ToString("F3");
+        logData[19] = rightEyeOpenness.ToString("F3");
+        logData[20] = rightEyeOpenness.ToString("F3");
 
         // Focus
         logData[21] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
-        logData[22] = "1.0"; // Focus stability (simulated)
+        logData[22] = "1.0";
+
+        // Append trial data
+        logData[23] = currentTrial.ToString();
+        logData[24] = objectDetectionTime.ToString("F3");
+        logData[25] = distractorFound.ToString();
+        logData[26] = distractorDetectionTime.ToString("F3");
 
         Log(logData);
     }
+
 
     void Log(string[] values)
     {
@@ -295,11 +310,12 @@ public class ExperimentManager : MonoBehaviour
         string path = Path.Combine(logPath, fileName);
 
         writer = new StreamWriter(path);
-        Log(ColumnNames); // Write CSV headers
+
+        // Write updated headers
+        Log(ColumnNames);
 
         Debug.Log("Log file created at: " + path);
     }
-
 
     void StopLogging()
     {
@@ -397,20 +413,34 @@ public class ExperimentManager : MonoBehaviour
 
     void SaveData()
     {
-        // Adding the column headers for eye-tracking data
-        logData.Add("Trial,ObjectDetectionTime,DistractorDetected,DistractorDetectionTime,GazeOriginX,GazeOriginY,GazeOriginZ,GazeDirectionX,GazeDirectionY,GazeDirectionZ,LeftEyeOpenness,RightEyeOpenness,LeftClosed,RightClosed");
+        if (!logging || writer == null)
+        {
+            Debug.LogError("SaveData() called but logging is not active or writer is null.");
+            return;
+        }
 
-        // Saving the data for the trial, including the gaze data
-        logData.Add($"{currentTrial},{objectDetectionTime},{distractorFound},{distractorDetectionTime}");
+        // Create an array of trial data
+        string[] trialData = new string[]
+        {
+        currentTrial.ToString(),
+        objectDetectionTime.ToString("F3"),
+        distractorFound.ToString(),
+        distractorDetectionTime.ToString("F3")
+        };
+
+        // Convert trial data to CSV format
+        string trialDataString = string.Join(",", trialData);
 
         try
         {
-            File.WriteAllLines(customFilePath, logData);
-            Debug.Log("Data saved to " + customFilePath);
+            writer.WriteLine(trialDataString);  // Append to the existing log
+            writer.Flush();  // Ensure data is saved
+            Debug.Log("Trial data saved: " + trialDataString);
         }
         catch (IOException e)
         {
-            Debug.LogError("Error saving file: " + e.Message);
+            Debug.LogError("Error saving trial data: " + e.Message);
         }
     }
+
 }
