@@ -10711,7 +10711,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_LocomotionProvider: {fileID: 766400565353033387}
-  m_MinHeight: 0
+  m_MinHeight: 1.36144
   m_MaxHeight: Infinity
 --- !u!108 &1914484609077366802
 Light:
@@ -16975,7 +16975,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: d76e85923f9b96b469d5943ee9d279a6, type: 3}
 --- !u!114 &5692732134652205668

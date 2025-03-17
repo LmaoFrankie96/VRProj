@@ -132,6 +132,10 @@ public class ExperimentManager : MonoBehaviour
 
     void EyeTracking()
     {
+        /*Debug.Log("Checking if eye tracking is allowed: " + IsGazeAllowed());
+        Debug.Log("Checking if eye tracking is calibrated: " + IsGazeCalibrated());
+        Debug.Log("Checking if device is valid: " + device.isValid);*/
+
         if (IsGazeAllowed() && IsGazeCalibrated())
         {
             if (!device.isValid)
@@ -141,6 +145,9 @@ public class ExperimentManager : MonoBehaviour
 
             if (gazeDataSource == GazeDataSource.InputSubsystem)
             {
+                /*bool gotEyesData = device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.eyesData, out eyes);
+                Debug.Log("Got eyes data: " + gotEyesData);*/
+
                 if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.eyesData, out eyes))
                 {
                     // Retrieve eye positions, rotations, and fixation point
@@ -179,10 +186,17 @@ public class ExperimentManager : MonoBehaviour
                     if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness) &&
                         eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
+                        
+
                         LogEyeTrackingData(leftEyeOpenness, rightEyeOpenness);
                         leftClosed = leftEyeOpenness < 0.1f;
                         rightClosed = rightEyeOpenness < 0.1f;
+                        /*bool gotLeftEyeOpenness = eyes.TryGetLeftEyeOpenAmount(out leftEyeOpenness);
+                        bool gotRightEyeOpenness = eyes.TryGetRightEyeOpenAmount(out  rightEyeOpenness);
+                        Debug.Log("Left Eye Openness: " + (gotLeftEyeOpenness ? leftEyeOpenness.ToString() : "Failed"));
+                        Debug.Log("Right Eye Openness: " + (gotRightEyeOpenness ? rightEyeOpenness.ToString() : "Failed"));*/
                     }
+
                     
                     // Check for blink and change distractor position if necessary
                     if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
@@ -267,23 +281,25 @@ public class ExperimentManager : MonoBehaviour
     {
         if (logging)
         {
-            Debug.LogWarning("Logging was on when StartLogging was called. No new log was started.");
+            Debug.LogWarning("Logging was already started.");
             return;
         }
 
         logging = true;
+        Debug.Log("StartLogging() was called.");
 
         string logPath = Path.GetDirectoryName(customFilePath);
-        Directory.CreateDirectory(logPath);
+        Directory.CreateDirectory(logPath); // Ensure directory exists
 
         string fileName = Path.GetFileName(customFilePath);
         string path = Path.Combine(logPath, fileName);
 
         writer = new StreamWriter(path);
+        Log(ColumnNames); // Write CSV headers
 
-        Log(ColumnNames);
-        Debug.Log("Log file started at: " + path);
+        Debug.Log("Log file created at: " + path);
     }
+
 
     void StopLogging()
     {
