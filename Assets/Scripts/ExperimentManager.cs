@@ -69,8 +69,10 @@ public class ExperimentManager : MonoBehaviour
     "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
     "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
     "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-    "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime"
+    "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
+    "Blinked" // New column for blink status
 };
+
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
 
@@ -131,12 +133,20 @@ public class ExperimentManager : MonoBehaviour
         }
         else if (interactedObject == distractorObject)
         {
-            Debug.Log("Distractor object interacted. Ending experiment.");
-            distractorDetectionTime = Time.time - experimentStartTime;
-            distractorFound = true;
-            EndExperiment();
+            if (currentTrial >= 3) // Only check for distractor detection after Trial 3 starts
+            {
+                Debug.Log("Distractor object interacted in Trial " + currentTrial + ". Ending experiment.");
+                distractorDetectionTime = Time.time - experimentStartTime;
+                distractorFound = true;
+                EndExperiment();
+            }
+            else
+            {
+                Debug.Log("Distractor ignored in Trial " + currentTrial);
+            }
         }
     }
+
 
     void EyeTracking()
     {
@@ -223,7 +233,7 @@ public class ExperimentManager : MonoBehaviour
 
     void LogEyeTrackingData(float leftEyeOpenness, float rightEyeOpenness)
     {
-        string[] logData = new string[27]; // Updated size to include trial data
+        string[] logData = new string[28]; // Updated size to include blink status
 
         // Gaze data frame number
         logData[0] = Time.frameCount.ToString();
@@ -241,17 +251,28 @@ public class ExperimentManager : MonoBehaviour
         // Combined gaze
         logData[5] = ValidString;
         logData[6] = eyes.TryGetFixationPoint(out Vector3 fixationPoint) ? fixationPoint.ToString("F3") : "";
-        logData[7] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
+        logData[7] = fixationPoint.ToString("F3");
+
+        // Ensure rightEyePosition is initialized
+        Vector3 rightEyePosition = Vector3.zero; // Default value
+        Vector3 leftEyePosition = Vector3.zero;  // Default value
+
+        if (eyes.TryGetLeftEyePosition(out leftEyePosition))
+        {
+            logData[11] = leftEyePosition.ToString("F3");
+        }
+
+        if (eyes.TryGetRightEyePosition(out rightEyePosition))
+        {
+            logData[17] = rightEyePosition.ToString("F3");
+        }
 
         // IPD
-        logData[8] = eyes.TryGetLeftEyePosition(out Vector3 leftEyePosition) && eyes.TryGetRightEyePosition(out Vector3 rightEyePosition)
-            ? Vector3.Distance(leftEyePosition, rightEyePosition).ToString("F3")
-            : "";
+        logData[8] = Vector3.Distance(leftEyePosition, rightEyePosition).ToString("F3");
 
         // Left eye
         logData[9] = ValidString;
         logData[10] = eyes.TryGetLeftEyeRotation(out Quaternion leftEyeRotation) ? leftEyeRotation.ToString("F3") : "";
-        logData[11] = eyes.TryGetLeftEyePosition(out leftEyePosition) ? leftEyePosition.ToString("F3") : "";
         logData[12] = leftEyeOpenness.ToString("F3");
         logData[13] = leftEyeOpenness.ToString("F3");
         logData[14] = leftEyeOpenness.ToString("F3");
@@ -259,13 +280,12 @@ public class ExperimentManager : MonoBehaviour
         // Right eye
         logData[15] = ValidString;
         logData[16] = eyes.TryGetRightEyeRotation(out Quaternion rightEyeRotation) ? rightEyeRotation.ToString("F3") : "";
-        logData[17] = eyes.TryGetRightEyePosition(out rightEyePosition) ? rightEyePosition.ToString("F3") : "";
         logData[18] = rightEyeOpenness.ToString("F3");
         logData[19] = rightEyeOpenness.ToString("F3");
         logData[20] = rightEyeOpenness.ToString("F3");
 
         // Focus
-        logData[21] = eyes.TryGetFixationPoint(out fixationPoint) ? fixationPoint.ToString("F3") : "";
+        logData[21] = fixationPoint.ToString("F3");
         logData[22] = "1.0";
 
         // Append trial data
@@ -273,6 +293,10 @@ public class ExperimentManager : MonoBehaviour
         logData[24] = objectDetectionTime.ToString("F3");
         logData[25] = distractorFound.ToString();
         logData[26] = distractorDetectionTime.ToString("F3");
+
+        // Blink Detection
+        int blinked = (leftEyeOpenness < 0.1f && rightEyeOpenness < 0.1f) ? 1 : 0;
+        logData[27] = blinked.ToString();
 
         Log(logData);
     }
