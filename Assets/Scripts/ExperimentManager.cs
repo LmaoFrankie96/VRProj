@@ -14,18 +14,22 @@ using TMPro;
 
 public class ExperimentManager : MonoBehaviour
 {
+    [Header("Experiment Objects")]
     public GameObject objectOfInterest;
     public GameObject distractorObject;
     public XRRaycastTrigger raycastTrigger;
     public InputActionProperty confirmAction;
 
+    [Header("File Settings")]
     public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
     public KeyCode endExperimentKey = KeyCode.Escape;
 
-    [Header("UI Elements")]
+    [Header("UI Settings")]
     public GameObject trialEndUI;
     public TextMeshProUGUI trialEndText;
     public float uiDisplayTime = 10f;
+    public Color successColor = Color.green;
+    public Color failColor = Color.red;
 
     [Header("Gaze Data")]
     public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
@@ -40,6 +44,7 @@ public class ExperimentManager : MonoBehaviour
     public Transform distractorPosition1;
     public Transform distractorPosition2;
 
+    // Private variables
     private float experimentStartTime;
     private float objectDetectionTime = -1f;
     private float distractorDetectionTime = -1f;
@@ -105,6 +110,7 @@ public class ExperimentManager : MonoBehaviour
         {
             raycastTrigger.OnObjectInteracted += HandleObjectInteraction;
         }
+
         if (distractorOriginalPosition == null || distractorPosition1 == null || distractorPosition2 == null)
         {
             Debug.LogError("Please assign all distractor position transforms.");
@@ -134,24 +140,16 @@ public class ExperimentManager : MonoBehaviour
         {
             ObjectFound();
         }
-        else if (interactedObject == distractorObject)
+        else if (interactedObject == distractorObject && currentTrial >= 3)
         {
-            if (currentTrial >= 3)
-            {
-                Debug.Log("Distractor object interacted in Trial " + currentTrial);
-                distractorDetectionTime = Time.time - experimentStartTime;
-                distractorFound = true;
+            distractorDetectionTime = Time.time - experimentStartTime;
+            distractorFound = true;
 
-                if (currentTrialCoroutine != null)
-                {
-                    StopCoroutine(currentTrialCoroutine);
-                }
-                StartCoroutine(ShowTrialEndUIAndProceed());
-            }
-            else
+            if (currentTrialCoroutine != null)
             {
-                Debug.Log("Distractor ignored in Trial " + currentTrial);
+                StopCoroutine(currentTrialCoroutine);
             }
+            StartCoroutine(ShowTrialEndUIAndProceed());
         }
     }
 
@@ -361,8 +359,31 @@ public class ExperimentManager : MonoBehaviour
 
     IEnumerator RunTrial()
     {
-        yield return new WaitForSeconds(30); // Trial duration
+        yield return new WaitForSeconds(30f);
+
+        if (currentTrial == 1 && !objectFound)
+        {
+            StartCoroutine(ShowExperimentEndUI("Experiment Ended\n(No object detected in Trial 1)"));
+            yield break;
+        }
+
         StartCoroutine(ShowTrialEndUIAndProceed());
+    }
+
+    public void ObjectFound()
+    {
+        if (!objectFound)
+        {
+            objectDetectionTime = Time.time - experimentStartTime;
+            objectFound = true;
+            Debug.Log($"Object found at: {objectDetectionTime} seconds");
+
+            if (currentTrialCoroutine != null)
+            {
+                StopCoroutine(currentTrialCoroutine);
+            }
+            StartCoroutine(ShowTrialEndUIAndProceed());
+        }
     }
 
     IEnumerator ShowTrialEndUIAndProceed()
@@ -370,10 +391,8 @@ public class ExperimentManager : MonoBehaviour
         if (trialEndUI != null)
         {
             trialEndUI.SetActive(true);
-            if (trialEndText != null)
-            {
-                trialEndText.text = "Trial " + currentTrial + " Ended";
-            }
+            trialEndText.text = $"Trial {currentTrial} Ended";
+            trialEndText.color = successColor;
         }
 
         yield return new WaitForSeconds(uiDisplayTime);
@@ -386,26 +405,31 @@ public class ExperimentManager : MonoBehaviour
         ProceedToNextTrial();
     }
 
+    IEnumerator ShowExperimentEndUI(string message)
+    {
+        if (trialEndUI != null)
+        {
+            trialEndUI.SetActive(true);
+            trialEndText.text = message;
+            trialEndText.color = failColor;
+        }
+
+        yield return new WaitForSeconds(uiDisplayTime);
+
+        EndExperiment();
+    }
+
     void ProceedToNextTrial()
     {
         currentTrial++;
+
         if (currentTrial > 3)
         {
-            EndExperiment();
+            StartCoroutine(ShowExperimentEndUI("Experiment Completed"));
         }
         else
         {
             StartTrial();
-        }
-    }
-
-    public void ObjectFound()
-    {
-        if (!objectFound)
-        {
-            objectDetectionTime = Time.time - experimentStartTime;
-            objectFound = true;
-            Debug.Log("Object found at: " + objectDetectionTime + " seconds");
         }
     }
 
@@ -428,6 +452,12 @@ public class ExperimentManager : MonoBehaviour
         StopLogging();
         SaveData();
         Debug.Log("Experiment Ended");
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
     }
 
     void SaveData()

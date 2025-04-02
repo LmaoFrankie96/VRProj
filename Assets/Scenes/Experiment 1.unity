@@ -3925,7 +3925,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1228775777
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5313,8 +5313,10 @@ MonoBehaviour:
   customFilePath: C:/Users/PE ERP Lab/Documents/RamishExperimentData.csv
   endExperimentKey: 27
   trialEndUI: {fileID: 1228775776}
-  trialEndText: {fileID: 782489813}
+  trialEndText: {fileID: 0}
   uiDisplayTime: 10
+  successColor: {r: 0, g: 1, b: 0, a: 1}
+  failColor: {r: 1, g: 0, b: 0, a: 1}
   gazeDataSource: 0
   fixationPointTransform: {fileID: 989934722}
   leftEyeTransform: {fileID: 1385289995}
