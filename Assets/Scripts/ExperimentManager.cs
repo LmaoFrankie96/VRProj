@@ -9,6 +9,8 @@ using System.Linq;
 using UnityEngine.XR;
 using static Varjo.XR.VarjoEyeTracking;
 using System;
+using UnityEngine.UI;
+using TMPro;
 
 public class ExperimentManager : MonoBehaviour
 {
@@ -17,13 +19,17 @@ public class ExperimentManager : MonoBehaviour
     public XRRaycastTrigger raycastTrigger;
     public InputActionProperty confirmAction;
 
-    public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv"; // Set your custom path here
-    public KeyCode nextTrialKey = KeyCode.Space; // Key to start the next trial
-    public KeyCode endExperimentKey = KeyCode.Escape; // Key to end the experiment immediately
+    public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
+    public KeyCode endExperimentKey = KeyCode.Escape;
+
+    [Header("UI Elements")]
+    public GameObject trialEndUI;
+    public TextMeshProUGUI trialEndText;
+    public float uiDisplayTime = 10f;
 
     [Header("Gaze Data")]
-    public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem; // Use Input Subsystem
-    
+    public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
+
     [Header("Visualization Transforms")]
     public Transform fixationPointTransform;
     public Transform leftEyeTransform;
@@ -41,37 +47,35 @@ public class ExperimentManager : MonoBehaviour
     private bool objectFound = false;
     private bool distractorFound = false;
     private bool experimentEnded = false;
-    private bool waitingForKeyPress = false;
     private bool eyeTrackingStarted = false;
-    private bool distractorInFrustum = false; // Track if the distractor is inside the frustum
+    private bool distractorInFrustum = false;
     private List<string> logData = new List<string>();
+    private Coroutine currentTrialCoroutine;
 
-    // Explicitly use the correct InputDevice class
     private List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>();
     private UnityEngine.XR.InputDevice device;
     private Eyes eyes;
     private bool leftClosed;
     private bool rightClosed;
 
-    private float blinkCooldown = 1.5f; // 1.5 seconds cooldown between blinks
+    private float blinkCooldown = 1.5f;
     private float lastBlinkTime = 0;
 
-    // Gaze data logging
     private StreamWriter writer = null;
     private bool logging = false;
     private int gazeDataCount = 0;
     private float gazeTimer = 0f;
 
     private static readonly string[] ColumnNames = {
-    "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation",
-    "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM",
-    "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio",
-    "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
-    "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
-    "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-    "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
-    "Blinked" // New column for blink status
-};
+        "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation",
+        "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM",
+        "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio",
+        "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
+        "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
+        "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
+        "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
+        "Blinked"
+    };
 
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
@@ -92,6 +96,11 @@ public class ExperimentManager : MonoBehaviour
 
     void Start()
     {
+        if (trialEndUI != null)
+        {
+            trialEndUI.SetActive(false);
+        }
+
         if (raycastTrigger != null)
         {
             raycastTrigger.OnObjectInteracted += HandleObjectInteraction;
@@ -116,12 +125,6 @@ public class ExperimentManager : MonoBehaviour
             EndExperiment();
         }
 
-        if (waitingForKeyPress && Input.GetKeyDown(nextTrialKey))
-        {
-            waitingForKeyPress = false;
-            ProceedToNextTrial();
-        }
-
         EyeTracking();
     }
 
@@ -133,12 +136,17 @@ public class ExperimentManager : MonoBehaviour
         }
         else if (interactedObject == distractorObject)
         {
-            if (currentTrial >= 3) // Only check for distractor detection after Trial 3 starts
+            if (currentTrial >= 3)
             {
-                Debug.Log("Distractor object interacted in Trial " + currentTrial + ". Ending experiment.");
+                Debug.Log("Distractor object interacted in Trial " + currentTrial);
                 distractorDetectionTime = Time.time - experimentStartTime;
                 distractorFound = true;
-                EndExperiment();
+
+                if (currentTrialCoroutine != null)
+                {
+                    StopCoroutine(currentTrialCoroutine);
+                }
+                StartCoroutine(ShowTrialEndUIAndProceed());
             }
             else
             {
@@ -147,13 +155,8 @@ public class ExperimentManager : MonoBehaviour
         }
     }
 
-
     void EyeTracking()
     {
-        /*Debug.Log("Checking if eye tracking is allowed: " + IsGazeAllowed());
-        Debug.Log("Checking if eye tracking is calibrated: " + IsGazeCalibrated());
-        Debug.Log("Checking if device is valid: " + device.isValid);*/
-
         if (IsGazeAllowed() && IsGazeCalibrated())
         {
             if (!device.isValid)
@@ -163,12 +166,8 @@ public class ExperimentManager : MonoBehaviour
 
             if (gazeDataSource == GazeDataSource.InputSubsystem)
             {
-                /*bool gotEyesData = device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.eyesData, out eyes);
-                Debug.Log("Got eyes data: " + gotEyesData);*/
-
                 if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.eyesData, out eyes))
                 {
-                    // Retrieve eye positions, rotations, and fixation point
                     if (eyes.TryGetLeftEyePosition(out Vector3 leftEyePosition))
                     {
                         leftEyeTransform.localPosition = leftEyePosition;
@@ -194,29 +193,19 @@ public class ExperimentManager : MonoBehaviour
                         fixationPointTransform.localPosition = fixationPoint;
                     }
 
-                    // Start logging if not already started
                     if (!logging)
                     {
                         StartLogging();
                     }
 
-                    // Log gaze data
                     if (eyes.TryGetLeftEyeOpenAmount(out float leftEyeOpenness) &&
                         eyes.TryGetRightEyeOpenAmount(out float rightEyeOpenness))
                     {
-                        
-
                         LogEyeTrackingData(leftEyeOpenness, rightEyeOpenness);
                         leftClosed = leftEyeOpenness < 0.1f;
                         rightClosed = rightEyeOpenness < 0.1f;
-                        /*bool gotLeftEyeOpenness = eyes.TryGetLeftEyeOpenAmount(out leftEyeOpenness);
-                        bool gotRightEyeOpenness = eyes.TryGetRightEyeOpenAmount(out  rightEyeOpenness);
-                        Debug.Log("Left Eye Openness: " + (gotLeftEyeOpenness ? leftEyeOpenness.ToString() : "Failed"));
-                        Debug.Log("Right Eye Openness: " + (gotRightEyeOpenness ? rightEyeOpenness.ToString() : "Failed"));*/
                     }
 
-                    
-                    // Check for blink and change distractor position if necessary
                     if (leftClosed && rightClosed && IsHeadsetWorn() && distractorInFrustum)
                     {
                         if (Time.time - lastBlinkTime >= blinkCooldown)
@@ -233,29 +222,19 @@ public class ExperimentManager : MonoBehaviour
 
     void LogEyeTrackingData(float leftEyeOpenness, float rightEyeOpenness)
     {
-        string[] logData = new string[28]; // Updated size to include blink status
+        string[] logData = new string[28];
 
-        // Gaze data frame number
         logData[0] = Time.frameCount.ToString();
-
-        // Gaze data capture time (nanoseconds)
-        logData[1] = (DateTime.Now.Ticks / 100).ToString(); // Simulated capture time
-
-        // Log time (milliseconds)
+        logData[1] = (DateTime.Now.Ticks / 100).ToString();
         logData[2] = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond).ToString();
-
-        // HMD
         logData[3] = Camera.main.transform.localPosition.ToString("F3");
         logData[4] = Camera.main.transform.localRotation.ToString("F3");
-
-        // Combined gaze
         logData[5] = ValidString;
         logData[6] = eyes.TryGetFixationPoint(out Vector3 fixationPoint) ? fixationPoint.ToString("F3") : "";
         logData[7] = fixationPoint.ToString("F3");
 
-        // Ensure rightEyePosition is initialized
-        Vector3 rightEyePosition = Vector3.zero; // Default value
-        Vector3 leftEyePosition = Vector3.zero;  // Default value
+        Vector3 rightEyePosition = Vector3.zero;
+        Vector3 leftEyePosition = Vector3.zero;
 
         if (eyes.TryGetLeftEyePosition(out leftEyePosition))
         {
@@ -267,40 +246,27 @@ public class ExperimentManager : MonoBehaviour
             logData[17] = rightEyePosition.ToString("F3");
         }
 
-        // IPD
         logData[8] = Vector3.Distance(leftEyePosition, rightEyePosition).ToString("F3");
-
-        // Left eye
         logData[9] = ValidString;
         logData[10] = eyes.TryGetLeftEyeRotation(out Quaternion leftEyeRotation) ? leftEyeRotation.ToString("F3") : "";
         logData[12] = leftEyeOpenness.ToString("F3");
         logData[13] = leftEyeOpenness.ToString("F3");
         logData[14] = leftEyeOpenness.ToString("F3");
-
-        // Right eye
         logData[15] = ValidString;
         logData[16] = eyes.TryGetRightEyeRotation(out Quaternion rightEyeRotation) ? rightEyeRotation.ToString("F3") : "";
         logData[18] = rightEyeOpenness.ToString("F3");
         logData[19] = rightEyeOpenness.ToString("F3");
         logData[20] = rightEyeOpenness.ToString("F3");
-
-        // Focus
         logData[21] = fixationPoint.ToString("F3");
         logData[22] = "1.0";
-
-        // Append trial data
         logData[23] = currentTrial.ToString();
         logData[24] = objectDetectionTime.ToString("F3");
         logData[25] = distractorFound.ToString();
         logData[26] = distractorDetectionTime.ToString("F3");
-
-        // Blink Detection
-        int blinked = (leftEyeOpenness < 0.1f && rightEyeOpenness < 0.1f) ? 1 : 0;
-        logData[27] = blinked.ToString();
+        logData[27] = (leftEyeOpenness < 0.1f && rightEyeOpenness < 0.1f) ? "1" : "0";
 
         Log(logData);
     }
-
 
     void Log(string[] values)
     {
@@ -310,8 +276,8 @@ public class ExperimentManager : MonoBehaviour
         string line = "";
         for (int i = 0; i < values.Length; ++i)
         {
-            values[i] = values[i].Replace("\r", "").Replace("\n", ""); // Remove new lines so they don't break csv
-            line += values[i] + (i == (values.Length - 1) ? "" : ";"); // Do not add semicolon to last data string
+            values[i] = values[i].Replace("\r", "").Replace("\n", "");
+            line += values[i] + (i == (values.Length - 1) ? "" : ";");
         }
         writer.WriteLine(line);
     }
@@ -328,16 +294,13 @@ public class ExperimentManager : MonoBehaviour
         Debug.Log("StartLogging() was called.");
 
         string logPath = Path.GetDirectoryName(customFilePath);
-        Directory.CreateDirectory(logPath); // Ensure directory exists
+        Directory.CreateDirectory(logPath);
 
         string fileName = Path.GetFileName(customFilePath);
         string path = Path.Combine(logPath, fileName);
 
         writer = new StreamWriter(path);
-
-        // Write updated headers
         Log(ColumnNames);
-
         Debug.Log("Log file created at: " + path);
     }
 
@@ -389,19 +352,38 @@ public class ExperimentManager : MonoBehaviour
     void StartTrial()
     {
         Debug.Log("Starting Trial " + currentTrial);
-        StartCoroutine(TrialTimer());
+        objectFound = false;
+        distractorFound = false;
+        objectDetectionTime = -1f;
+        distractorDetectionTime = -1f;
+        currentTrialCoroutine = StartCoroutine(RunTrial());
     }
 
-    IEnumerator TrialTimer()
+    IEnumerator RunTrial()
     {
-        yield return new WaitForSeconds(30); // Each trial lasts 30 seconds
-        AskForDistractions();
+        yield return new WaitForSeconds(30); // Trial duration
+        StartCoroutine(ShowTrialEndUIAndProceed());
     }
 
-    void AskForDistractions()
+    IEnumerator ShowTrialEndUIAndProceed()
     {
-        Debug.Log("Did you see any distractions? Press " + nextTrialKey + " to continue to the next trial.");
-        waitingForKeyPress = true;
+        if (trialEndUI != null)
+        {
+            trialEndUI.SetActive(true);
+            if (trialEndText != null)
+            {
+                trialEndText.text = "Trial " + currentTrial + " Ended";
+            }
+        }
+
+        yield return new WaitForSeconds(uiDisplayTime);
+
+        if (trialEndUI != null)
+        {
+            trialEndUI.SetActive(false);
+        }
+
+        ProceedToNextTrial();
     }
 
     void ProceedToNextTrial()
@@ -429,7 +411,20 @@ public class ExperimentManager : MonoBehaviour
 
     void EndExperiment()
     {
+        if (experimentEnded) return;
+
         experimentEnded = true;
+
+        if (currentTrialCoroutine != null)
+        {
+            StopCoroutine(currentTrialCoroutine);
+        }
+
+        if (trialEndUI != null)
+        {
+            trialEndUI.SetActive(false);
+        }
+
         StopLogging();
         SaveData();
         Debug.Log("Experiment Ended");
@@ -443,22 +438,20 @@ public class ExperimentManager : MonoBehaviour
             return;
         }
 
-        // Create an array of trial data
         string[] trialData = new string[]
         {
-        currentTrial.ToString(),
-        objectDetectionTime.ToString("F3"),
-        distractorFound.ToString(),
-        distractorDetectionTime.ToString("F3")
+            currentTrial.ToString(),
+            objectDetectionTime.ToString("F3"),
+            distractorFound.ToString(),
+            distractorDetectionTime.ToString("F3")
         };
 
-        // Convert trial data to CSV format
         string trialDataString = string.Join(",", trialData);
 
         try
         {
-            writer.WriteLine(trialDataString);  // Append to the existing log
-            writer.Flush();  // Ensure data is saved
+            writer.WriteLine(trialDataString);
+            writer.Flush();
             Debug.Log("Trial data saved: " + trialDataString);
         }
         catch (IOException e)
@@ -466,5 +459,4 @@ public class ExperimentManager : MonoBehaviour
             Debug.LogError("Error saving trial data: " + e.Message);
         }
     }
-
 }
