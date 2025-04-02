@@ -5313,7 +5313,7 @@ MonoBehaviour:
   customFilePath: C:/Users/PE ERP Lab/Documents/RamishExperimentData.csv
   endExperimentKey: 27
   trialEndUI: {fileID: 1228775776}
-  trialEndText: {fileID: 0}
+  trialEndText: {fileID: 782489813}
   uiDisplayTime: 10
   successColor: {r: 0, g: 1, b: 0, a: 1}
   failColor: {r: 1, g: 0, b: 0, a: 1}

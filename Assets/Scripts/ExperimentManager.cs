@@ -378,6 +378,12 @@ public class ExperimentManager : MonoBehaviour
             objectFound = true;
             Debug.Log($"Object found at: {objectDetectionTime} seconds");
 
+            // NEW: Deactivate the object when found
+            if (objectOfInterest != null)
+            {
+                objectOfInterest.SetActive(false);
+            }
+
             if (currentTrialCoroutine != null)
             {
                 StopCoroutine(currentTrialCoroutine);
@@ -385,6 +391,7 @@ public class ExperimentManager : MonoBehaviour
             StartCoroutine(ShowTrialEndUIAndProceed());
         }
     }
+
 
     IEnumerator ShowTrialEndUIAndProceed()
     {
