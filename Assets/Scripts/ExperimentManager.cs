@@ -11,6 +11,7 @@ using static Varjo.XR.VarjoEyeTracking;
 using System;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class ExperimentManager : MonoBehaviour
 {
@@ -24,12 +25,21 @@ public class ExperimentManager : MonoBehaviour
     public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
     public KeyCode endExperimentKey = KeyCode.Escape;
 
+    [Header("Trial Settings")]
+    public float trial1Duration = 30f;
+    public float trial2Duration = 45f;
+    public float trial3Duration = 60f;
+
     [Header("UI Settings")]
     public GameObject trialEndUI;
     public TextMeshProUGUI trialEndText;
     public float uiDisplayTime = 10f;
     public Color successColor = Color.green;
     public Color failColor = Color.red;
+
+    [Header("Scene Settings")]
+    public string failureSceneName = "BreakScene";
+    public string completionSceneName = "BreakScene";
 
     [Header("Gaze Data")]
     public GazeDataSource gazeDataSource = GazeDataSource.InputSubsystem;
@@ -46,6 +56,7 @@ public class ExperimentManager : MonoBehaviour
 
     // Private variables
     private float experimentStartTime;
+    private float trialStartTime; // NEW: Tracks when each trial begins
     private float objectDetectionTime = -1f;
     private float distractorDetectionTime = -1f;
     private int currentTrial = 1;
@@ -78,7 +89,7 @@ public class ExperimentManager : MonoBehaviour
         "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
         "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
         "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-        "Trial", "ObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
+        "Trial", "TrialObjectDetectionTime", "DistractorDetected", "TrialDistractorDetectionTime", // Updated names
         "Blinked"
     };
 
@@ -89,6 +100,11 @@ public class ExperimentManager : MonoBehaviour
     {
         UnityEngine.XR.InputDevices.GetDevicesAtXRNode(XRNode.CenterEye, devices);
         device = devices.FirstOrDefault();
+
+        if (!device.isValid)
+        {
+            Debug.LogError("Failed to get eye tracking device");
+        }
     }
 
     void OnEnable()
@@ -115,6 +131,8 @@ public class ExperimentManager : MonoBehaviour
         {
             Debug.LogError("Please assign all distractor position transforms.");
         }
+
+        VarjoEyeTracking.RequestGazeCalibration();
     }
 
     void Update()
@@ -125,13 +143,10 @@ public class ExperimentManager : MonoBehaviour
             StartExperiment();
         }
 
-        if (Input.GetKeyDown(endExperimentKey))
+        if (eyeTrackingStarted)
         {
-            Debug.Log("Escape key pressed. Ending experiment immediately.");
-            EndExperiment();
+            EyeTracking();
         }
-
-        EyeTracking();
     }
 
     void HandleObjectInteraction(GameObject interactedObject)
@@ -142,8 +157,9 @@ public class ExperimentManager : MonoBehaviour
         }
         else if (interactedObject == distractorObject && currentTrial >= 3)
         {
-            distractorDetectionTime = Time.time - experimentStartTime;
+            distractorDetectionTime = Time.time - trialStartTime; // Updated to use trial time
             distractorFound = true;
+            Debug.Log($"Distractor found in Trial {currentTrial} at: {distractorDetectionTime}s");
 
             if (currentTrialCoroutine != null)
             {
@@ -160,6 +176,7 @@ public class ExperimentManager : MonoBehaviour
             if (!device.isValid)
             {
                 GetDevice();
+                if (!device.isValid) return;
             }
 
             if (gazeDataSource == GazeDataSource.InputSubsystem)
@@ -349,17 +366,33 @@ public class ExperimentManager : MonoBehaviour
 
     void StartTrial()
     {
-        Debug.Log("Starting Trial " + currentTrial);
+        trialStartTime = Time.time; // NEW: Record trial start time
+        Debug.Log($"Starting Trial {currentTrial} at time: {trialStartTime}");
+
         objectFound = false;
         distractorFound = false;
         objectDetectionTime = -1f;
         distractorDetectionTime = -1f;
-        currentTrialCoroutine = StartCoroutine(RunTrial());
+
+        if (objectOfInterest != null)
+        {
+            objectOfInterest.SetActive(true);
+        }
+
+        float duration = currentTrial switch
+        {
+            1 => trial1Duration,
+            2 => trial2Duration,
+            3 => trial3Duration,
+            _ => 30f
+        };
+
+        currentTrialCoroutine = StartCoroutine(RunTrial(duration));
     }
 
-    IEnumerator RunTrial()
+    IEnumerator RunTrial(float duration)
     {
-        yield return new WaitForSeconds(30f);
+        yield return new WaitForSeconds(duration);
 
         if (currentTrial == 1 && !objectFound)
         {
@@ -374,11 +407,10 @@ public class ExperimentManager : MonoBehaviour
     {
         if (!objectFound)
         {
-            objectDetectionTime = Time.time - experimentStartTime;
+            objectDetectionTime = Time.time - trialStartTime; // Updated to use trial time
             objectFound = true;
-            Debug.Log($"Object found at: {objectDetectionTime} seconds");
+            Debug.Log($"Object found in Trial {currentTrial} at: {objectDetectionTime}s");
 
-            // NEW: Deactivate the object when found
             if (objectOfInterest != null)
             {
                 objectOfInterest.SetActive(false);
@@ -392,14 +424,17 @@ public class ExperimentManager : MonoBehaviour
         }
     }
 
-
     IEnumerator ShowTrialEndUIAndProceed()
     {
         if (trialEndUI != null)
         {
             trialEndUI.SetActive(true);
-            trialEndText.text = $"Trial {currentTrial} Ended";
-            trialEndText.color = successColor;
+            if (currentTrial == 1)
+                trialEndText.text = $"Did you see anything unusual happening? Look for it!";
+            else if (currentTrial == 2)
+                trialEndText.text = $"Something is moving inside the environment. Find it and point towards it!";
+            else if (currentTrial == 3)
+                trialEndText.text = $"Something moves when you blink! Look for it and find it!";
         }
 
         yield return new WaitForSeconds(uiDisplayTime);
@@ -423,7 +458,7 @@ public class ExperimentManager : MonoBehaviour
 
         yield return new WaitForSeconds(uiDisplayTime);
 
-        EndExperiment();
+        UnityEngine.SceneManagement.SceneManager.LoadScene(failureSceneName);
     }
 
     void ProceedToNextTrial()
@@ -432,39 +467,12 @@ public class ExperimentManager : MonoBehaviour
 
         if (currentTrial > 3)
         {
-            StartCoroutine(ShowExperimentEndUI("Experiment Completed"));
+            UnityEngine.SceneManagement.SceneManager.LoadScene(completionSceneName);
         }
         else
         {
             StartTrial();
         }
-    }
-
-    void EndExperiment()
-    {
-        if (experimentEnded) return;
-
-        experimentEnded = true;
-
-        if (currentTrialCoroutine != null)
-        {
-            StopCoroutine(currentTrialCoroutine);
-        }
-
-        if (trialEndUI != null)
-        {
-            trialEndUI.SetActive(false);
-        }
-
-        StopLogging();
-        SaveData();
-        Debug.Log("Experiment Ended");
-
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
     }
 
     void SaveData()
