@@ -95,7 +95,7 @@ public class ExperimentManager : MonoBehaviour
 
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
-
+    private bool shouldTrackObjectTime = true;
     void GetDevice()
     {
         UnityEngine.XR.InputDevices.GetDevicesAtXRNode(XRNode.CenterEye, devices);
@@ -366,17 +366,21 @@ public class ExperimentManager : MonoBehaviour
 
     void StartTrial()
     {
-        trialStartTime = Time.time; // NEW: Record trial start time
-        Debug.Log($"Starting Trial {currentTrial} at time: {trialStartTime}");
+        trialStartTime = Time.time;
+        Debug.Log($"Starting Trial {currentTrial}");
+
+        // NEW: Only track object time in Trial 1
+        shouldTrackObjectTime = (currentTrial == 1);
 
         objectFound = false;
         distractorFound = false;
         objectDetectionTime = -1f;
         distractorDetectionTime = -1f;
 
+        // NEW: Only activate object in Trial 1
         if (objectOfInterest != null)
         {
-            objectOfInterest.SetActive(true);
+            objectOfInterest.SetActive(currentTrial == 1);
         }
 
         float duration = currentTrial switch
@@ -389,6 +393,7 @@ public class ExperimentManager : MonoBehaviour
 
         currentTrialCoroutine = StartCoroutine(RunTrial(duration));
     }
+
 
     IEnumerator RunTrial(float duration)
     {
@@ -407,9 +412,18 @@ public class ExperimentManager : MonoBehaviour
     {
         if (!objectFound)
         {
-            objectDetectionTime = Time.time - trialStartTime; // Updated to use trial time
+            // NEW: Only record time if in Trial 1
+            if (shouldTrackObjectTime)
+            {
+                objectDetectionTime = Time.time - trialStartTime;
+                Debug.Log($"Object found in Trial {currentTrial} at: {objectDetectionTime}s");
+            }
+            else
+            {
+                Debug.Log($"Object interaction in Trial {currentTrial} (not timed)");
+            }
+
             objectFound = true;
-            Debug.Log($"Object found in Trial {currentTrial} at: {objectDetectionTime}s");
 
             if (objectOfInterest != null)
             {
