@@ -176,7 +176,7 @@ public class ExperimentManager : MonoBehaviour
             if (!device.isValid)
             {
                 GetDevice();
-                if (!device.isValid) return;
+                //if (!device.isValid) return;
             }
 
             if (gazeDataSource == GazeDataSource.InputSubsystem)
