@@ -5450,9 +5450,9 @@ MonoBehaviour:
     m_Reference: {fileID: -5684558904543120851, guid: e0ca4504471ca124088e1e2cfe6804ae, type: 3}
   fileName: ExperimentData.csv
   endExperimentKey: 27
-  trial1Duration: 30
+  trial1Duration: 120
   trial2Duration: 45
-  trial3Duration: 60
+  trial3Duration: 45
   trialEndUI: {fileID: 1228775776}
   trialEndText: {fileID: 782489813}
   uiDisplayTime: 10
