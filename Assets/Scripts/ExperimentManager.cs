@@ -150,6 +150,12 @@ public class ExperimentManager : MonoBehaviour
         {
             EndExperiment();
         }
+
+        if(currentTrial>=2 && distractorFound)
+        {
+
+            StartCoroutine(ShowExperimentEndUI("Experiment Ended\n(You detected the right object! Thanks for playing)"));
+        }
     }
 
     void StartExperiment()
@@ -168,17 +174,9 @@ public class ExperimentManager : MonoBehaviour
         {
             ObjectFound();
         }
-        else if (interactedObject == distractorObject && currentTrial >= 3)
+        else if (interactedObject == distractorObject && currentTrial >= 2)
         {
-            distractorDetectionTime = Time.time - trialStartTime;
-            distractorFound = true;
-            Debug.Log($"Distractor found in Trial {currentTrial} at: {distractorDetectionTime}s");
-
-            if (currentTrialCoroutine != null)
-            {
-                StopCoroutine(currentTrialCoroutine);
-            }
-            StartCoroutine(ShowTrialEndUIAndProceed());
+            DistractorFound();
         }
     }
 
@@ -436,7 +434,27 @@ public class ExperimentManager : MonoBehaviour
             StartCoroutine(ShowTrialEndUIAndProceed());
         }
     }
+    public void DistractorFound()
+    {
+        if (!distractorFound)
+        {
+            distractorDetectionTime = Time.time - trialStartTime;
+            Debug.Log($"Distractor found in Trial {currentTrial} at: {distractorDetectionTime}s");
 
+            distractorFound = true;
+
+            if (distractorObject != null)
+            {
+                distractorObject.SetActive(false);
+            }
+
+            if (currentTrialCoroutine != null)
+            {
+                StopCoroutine(currentTrialCoroutine);
+            }
+            StartCoroutine(ShowTrialEndUIAndProceed());
+        }
+    }
     IEnumerator ShowTrialEndUIAndProceed()
     {
         if (trialEndUI != null)
@@ -444,10 +462,10 @@ public class ExperimentManager : MonoBehaviour
             trialEndUI.SetActive(true);
             if (currentTrial == 1)
                 trialEndText.text = $"Did you see anything unusual happening? Look for it!";
-            else if (currentTrial == 2)
-                trialEndText.text = $"Something is moving inside the environment. Find it and point towards it!";
-            else if (currentTrial == 3)
+            else if (currentTrial == 2 && !distractorFound)
                 trialEndText.text = $"Something moves when you blink! Look for it and find it!";
+            else if (currentTrial == 3 && !distractorFound)
+                trialEndText.text = $"You weren't able to find the object. Thanks for playing!";
         }
 
         yield return new WaitForSeconds(uiDisplayTime);
