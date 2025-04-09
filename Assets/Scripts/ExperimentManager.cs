@@ -22,7 +22,8 @@ public class ExperimentManager : MonoBehaviour
     public InputActionProperty confirmAction;
 
     [Header("File Settings")]
-    public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
+   // public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
+    public string fileName = "ExperimentData.csv";
     public KeyCode endExperimentKey = KeyCode.Escape;
 
     [Header("Trial Settings")]
@@ -308,16 +309,15 @@ public class ExperimentManager : MonoBehaviour
         logging = true;
         Debug.Log("StartLogging() was called.");
 
-        string logPath = Path.GetDirectoryName(customFilePath);
-        Directory.CreateDirectory(logPath);
+        string directory = Application.persistentDataPath;
+        Directory.CreateDirectory(directory);
 
-        string fileName = Path.GetFileName(customFilePath);
-        string path = Path.Combine(logPath, fileName);
-
+        string path = Path.Combine(directory, fileName);
         writer = new StreamWriter(path);
         Log(ColumnNames);
         Debug.Log("Log file created at: " + path);
     }
+
 
     void StopLogging()
     {
