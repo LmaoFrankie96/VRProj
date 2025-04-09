@@ -67,8 +67,7 @@ public class ExperimentManager : MonoBehaviour
     private bool distractorInFrustum = false;
     private List<string> logData = new List<string>();
     private Coroutine currentTrialCoroutine;
-    private bool calibrationComplete = false;
-    private bool calibrationRequested = false;
+    private bool experimentStarted = false;
 
     private List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>();
     private UnityEngine.XR.InputDevice device;
@@ -135,42 +134,14 @@ public class ExperimentManager : MonoBehaviour
             Debug.LogError("Please assign all distractor position transforms.");
         }
 
-        RequestCalibration();
-    }
-
-    void RequestCalibration()
-    {
-        if (VarjoEyeTracking.IsGazeAllowed())
-        {
-            VarjoEyeTracking.RequestGazeCalibration();
-            calibrationRequested = true;
-            StartCoroutine(CheckCalibrationStatus());
-        }
-        else
-        {
-            Debug.LogError("Gaze tracking is not allowed");
-        }
-    }
-
-    IEnumerator CheckCalibrationStatus()
-    {
-        while (!VarjoEyeTracking.IsGazeCalibrated())
-        {
-            yield return new WaitForSeconds(0.5f);
-        }
-        calibrationComplete = true;
-        Debug.Log("Gaze calibration completed successfully");
+        // Start the experiment directly without calibration
+        StartExperiment();
     }
 
     void Update()
     {
-        if (!eyeTrackingStarted && calibrationComplete)
-        {
-            eyeTrackingStarted = true;
-            StartExperiment();
-        }
-
-        if (eyeTrackingStarted)
+        // Only track eyes if experiment is properly initialized
+        if (experimentStarted)
         {
             EyeTracking();
         }
@@ -183,12 +154,9 @@ public class ExperimentManager : MonoBehaviour
 
     void StartExperiment()
     {
-        if (!calibrationComplete)
-        {
-            Debug.LogWarning("Attempted to start experiment before calibration was complete");
-            return;
-        }
+        if (experimentStarted) return;
 
+        experimentStarted = true;
         experimentStartTime = Time.time;
         confirmAction.action.Enable();
         StartTrial();
@@ -383,7 +351,7 @@ public class ExperimentManager : MonoBehaviour
 
     private bool IsHeadsetWorn()
     {
-        return VarjoEyeTracking.IsGazeCalibrated() && device.isValid;
+        return device.isValid;
     }
 
     private void ChangeDistractorPosition()
