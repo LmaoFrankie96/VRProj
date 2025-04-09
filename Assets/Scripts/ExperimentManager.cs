@@ -90,7 +90,7 @@ public class ExperimentManager : MonoBehaviour
         "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
         "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
         "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-        "Trial", "TrialObjectDetectionTime", "DistractorDetected", "TrialDistractorDetectionTime",
+        "Trial", "MainObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
         "Blinked"
     };
 
@@ -372,14 +372,28 @@ public class ExperimentManager : MonoBehaviour
 
         shouldTrackObjectTime = (currentTrial == 1);
 
+        // Reset only the "found" flags for the current trial
         objectFound = false;
         distractorFound = false;
-        objectDetectionTime = -1f;
-        distractorDetectionTime = -1f;
+
+        // Keep detection times persistent (DO NOT reset them here)
+        // objectDetectionTime = -1f;  // REMOVE THIS LINE
+        // distractorDetectionTime = -1f;  // REMOVE THIS LINE
 
         if (objectOfInterest != null)
         {
             objectOfInterest.SetActive(currentTrial == 1);
+        }
+
+        if (distractorObject != null)
+        {
+            distractorObject.SetActive(currentTrial >= 2);
+            if (currentTrial >= 2)
+            {
+                // Reset distractor position at start of trials 2 and 3
+                distractorObject.transform.position = distractorOriginalPosition.position;
+                distractorObject.transform.rotation = distractorOriginalPosition.rotation;
+            }
         }
 
         float duration = currentTrial switch
@@ -392,7 +406,6 @@ public class ExperimentManager : MonoBehaviour
 
         currentTrialCoroutine = StartCoroutine(RunTrial(duration));
     }
-
     IEnumerator RunTrial(float duration)
     {
         yield return new WaitForSeconds(duration);
