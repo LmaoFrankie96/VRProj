@@ -22,7 +22,6 @@ public class ExperimentManager : MonoBehaviour
     public InputActionProperty confirmAction;
 
     [Header("File Settings")]
-   // public string customFilePath = "C:/Users/PE ERP Lab/Documents/Ramish/ExperimentData.csv";
     public string fileName = "ExperimentData.csv";
     public KeyCode endExperimentKey = KeyCode.Escape;
 
@@ -57,7 +56,7 @@ public class ExperimentManager : MonoBehaviour
 
     // Private variables
     private float experimentStartTime;
-    private float trialStartTime; // NEW: Tracks when each trial begins
+    private float trialStartTime;
     private float objectDetectionTime = -1f;
     private float distractorDetectionTime = -1f;
     private int currentTrial = 1;
@@ -68,6 +67,8 @@ public class ExperimentManager : MonoBehaviour
     private bool distractorInFrustum = false;
     private List<string> logData = new List<string>();
     private Coroutine currentTrialCoroutine;
+    private bool calibrationComplete = false;
+    private bool calibrationRequested = false;
 
     private List<UnityEngine.XR.InputDevice> devices = new List<UnityEngine.XR.InputDevice>();
     private UnityEngine.XR.InputDevice device;
@@ -90,13 +91,14 @@ public class ExperimentManager : MonoBehaviour
         "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
         "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
         "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-        "Trial", "TrialObjectDetectionTime", "DistractorDetected", "TrialDistractorDetectionTime", // Updated names
+        "Trial", "TrialObjectDetectionTime", "DistractorDetected", "TrialDistractorDetectionTime",
         "Blinked"
     };
 
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
     private bool shouldTrackObjectTime = true;
+
     void GetDevice()
     {
         UnityEngine.XR.InputDevices.GetDevicesAtXRNode(XRNode.CenterEye, devices);
@@ -133,12 +135,36 @@ public class ExperimentManager : MonoBehaviour
             Debug.LogError("Please assign all distractor position transforms.");
         }
 
-        VarjoEyeTracking.RequestGazeCalibration();
+        RequestCalibration();
+    }
+
+    void RequestCalibration()
+    {
+        if (VarjoEyeTracking.IsGazeAllowed())
+        {
+            VarjoEyeTracking.RequestGazeCalibration();
+            calibrationRequested = true;
+            StartCoroutine(CheckCalibrationStatus());
+        }
+        else
+        {
+            Debug.LogError("Gaze tracking is not allowed");
+        }
+    }
+
+    IEnumerator CheckCalibrationStatus()
+    {
+        while (!VarjoEyeTracking.IsGazeCalibrated())
+        {
+            yield return new WaitForSeconds(0.5f);
+        }
+        calibrationComplete = true;
+        Debug.Log("Gaze calibration completed successfully");
     }
 
     void Update()
     {
-        if (!eyeTrackingStarted && VarjoEyeTracking.IsGazeAllowed() && VarjoEyeTracking.IsGazeCalibrated())
+        if (!eyeTrackingStarted && calibrationComplete)
         {
             eyeTrackingStarted = true;
             StartExperiment();
@@ -148,6 +174,24 @@ public class ExperimentManager : MonoBehaviour
         {
             EyeTracking();
         }
+
+        if (Input.GetKeyDown(endExperimentKey))
+        {
+            EndExperiment();
+        }
+    }
+
+    void StartExperiment()
+    {
+        if (!calibrationComplete)
+        {
+            Debug.LogWarning("Attempted to start experiment before calibration was complete");
+            return;
+        }
+
+        experimentStartTime = Time.time;
+        confirmAction.action.Enable();
+        StartTrial();
     }
 
     void HandleObjectInteraction(GameObject interactedObject)
@@ -158,7 +202,7 @@ public class ExperimentManager : MonoBehaviour
         }
         else if (interactedObject == distractorObject && currentTrial >= 3)
         {
-            distractorDetectionTime = Time.time - trialStartTime; // Updated to use trial time
+            distractorDetectionTime = Time.time - trialStartTime;
             distractorFound = true;
             Debug.Log($"Distractor found in Trial {currentTrial} at: {distractorDetectionTime}s");
 
@@ -177,7 +221,6 @@ public class ExperimentManager : MonoBehaviour
             if (!device.isValid)
             {
                 GetDevice();
-                //if (!device.isValid) return;
             }
 
             if (gazeDataSource == GazeDataSource.InputSubsystem)
@@ -318,7 +361,6 @@ public class ExperimentManager : MonoBehaviour
         Debug.Log("Log file created at: " + path);
     }
 
-
     void StopLogging()
     {
         if (!logging)
@@ -357,19 +399,11 @@ public class ExperimentManager : MonoBehaviour
         distractorInFrustum = isInFrustum;
     }
 
-    void StartExperiment()
-    {
-        experimentStartTime = Time.time;
-        confirmAction.action.Enable();
-        StartTrial();
-    }
-
     void StartTrial()
     {
         trialStartTime = Time.time;
         Debug.Log($"Starting Trial {currentTrial}");
 
-        // NEW: Only track object time in Trial 1
         shouldTrackObjectTime = (currentTrial == 1);
 
         objectFound = false;
@@ -377,7 +411,6 @@ public class ExperimentManager : MonoBehaviour
         objectDetectionTime = -1f;
         distractorDetectionTime = -1f;
 
-        // NEW: Only activate object in Trial 1
         if (objectOfInterest != null)
         {
             objectOfInterest.SetActive(currentTrial == 1);
@@ -393,7 +426,6 @@ public class ExperimentManager : MonoBehaviour
 
         currentTrialCoroutine = StartCoroutine(RunTrial(duration));
     }
-
 
     IEnumerator RunTrial(float duration)
     {
@@ -412,7 +444,6 @@ public class ExperimentManager : MonoBehaviour
     {
         if (!objectFound)
         {
-            // NEW: Only record time if in Trial 1
             if (shouldTrackObjectTime)
             {
                 objectDetectionTime = Time.time - trialStartTime;
@@ -517,5 +548,16 @@ public class ExperimentManager : MonoBehaviour
         {
             Debug.LogError("Error saving trial data: " + e.Message);
         }
+    }
+
+    void EndExperiment()
+    {
+        StopLogging();
+        experimentEnded = true;
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
     }
 }
