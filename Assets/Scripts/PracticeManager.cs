@@ -6,6 +6,7 @@ using static Varjo.XR.VarjoEyeTracking;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class PracticeManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class PracticeManager : MonoBehaviour
     public float trialDuration = 30f; // Set your practice duration
     public string breakSceneName = "BreakScene";
     public GameObject objectOfInterest;
+    public XRRaycastTrigger raycastTrigger; // Add this reference
 
     [Header("Eye Tracking")]
     public Transform leftEyeTransform;
@@ -32,12 +34,22 @@ public class PracticeManager : MonoBehaviour
 
     void Start()
     {
-        // Initialize eye tracking
-        GetDevice();
-        VarjoEyeTracking.RequestGazeCalibration();
+        // Set up interaction listener
+        if (raycastTrigger != null)
+        {
+            raycastTrigger.OnObjectInteracted += HandleObjectInteraction;
+        }
 
         // Start practice trial
         StartTrial();
+    }
+
+    void OnEnable()
+    {
+        if (!device.isValid)
+        {
+            GetDevice();
+        }
     }
 
     void Update()
@@ -101,11 +113,29 @@ public class PracticeManager : MonoBehaviour
         }
     }
 
-    public void HandleObjectFound()
+    // New method: Handle object interaction (like ExperimentManager)
+    void HandleObjectInteraction(GameObject interactedObject)
     {
-        // Called when user points at object of interest
+        if (interactedObject == objectOfInterest && trialRunning)
+        {
+            ObjectFound();
+        }
+    }
+
+    // Updated to match ExperimentManager's behavior
+    public void ObjectFound()
+    {
         if (trialRunning)
         {
+            Debug.Log("Practice object found!");
+
+            // Disable object (like in ExperimentManager)
+            if (objectOfInterest != null)
+            {
+                objectOfInterest.SetActive(false);
+            }
+
+            // End trial immediately
             EndTrial();
         }
     }
@@ -126,11 +156,16 @@ public class PracticeManager : MonoBehaviour
 
         Debug.Log($"Practice ended. Blink rate: {blinkRate} blinks/sec");
 
-        // Hide object
-        if (objectOfInterest != null)
-            objectOfInterest.SetActive(false);
-
         // Go to break scene
         UnityEngine.SceneManagement.SceneManager.LoadScene(breakSceneName);
+    }
+
+    void OnDisable()
+    {
+        // Clean up event listener
+        if (raycastTrigger != null)
+        {
+            raycastTrigger.OnObjectInteracted -= HandleObjectInteraction;
+        }
     }
 }
