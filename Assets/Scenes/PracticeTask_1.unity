@@ -51740,8 +51740,8 @@ GameObject:
   - component: {fileID: 3442786467319990770}
   - component: {fileID: 6036539831709475647}
   - component: {fileID: 4048568256377874989}
-  - component: {fileID: 6036539831709475649}
   - component: {fileID: 6036539831709475648}
+  - component: {fileID: 6036539831709475649}
   m_Layer: 0
   m_Name: Mech_apt_01
   m_TagString: Untagged
@@ -51809,27 +51809,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!65 &223527289873116910
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6636296268106760670}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.074426, y: 0.034341663, z: 0.20763268}
-  m_Center: {x: 0.0041717887, y: -0.16154833, z: 0.000000029802322}
 --- !u!4 &248132838673722175
 Transform:
   m_ObjectHideFlags: 0
@@ -60266,8 +60245,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 454d72422ba532c479ba5a66103b5cce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!64 &6036539831709475649
-MeshCollider:
+--- !u!65 &6036539831709475649
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -60284,10 +60263,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4412010987047735676, guid: 34e386a75bb8feb4aa0f48b512cbb268, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 0.33, y: 0.34, z: 0.38}
+  m_Center: {x: 0, y: 0.0013351496, z: -0.0000000018626454}
 --- !u!1001 &6132150286275889754
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -60686,7 +60664,6 @@ GameObject:
   - component: {fileID: 4473195925923569803}
   - component: {fileID: 5485299067879272836}
   - component: {fileID: 8288315176738992586}
-  - component: {fileID: 223527289873116910}
   m_Layer: 0
   m_Name: Foot_R.002
   m_TagString: Untagged
