@@ -380,19 +380,37 @@ public class ExperimentManager : MonoBehaviour
         // objectDetectionTime = -1f;  // REMOVE THIS LINE
         // distractorDetectionTime = -1f;  // REMOVE THIS LINE
 
+        // Handle object of interest
         if (objectOfInterest != null)
         {
-            objectOfInterest.SetActive(currentTrial == 1);
+            objectOfInterest.SetActive(currentTrial == 1); // Only active in Trial 1 (modify if needed)
         }
 
+        // Handle distractor object
         if (distractorObject != null)
         {
-            distractorObject.SetActive(currentTrial >= 2);
+            // Always keep the distractor active
+            distractorObject.SetActive(true);
+
+            // Reset position in trials 2 and 3
             if (currentTrial >= 2)
             {
-                // Reset distractor position at start of trials 2 and 3
                 distractorObject.transform.position = distractorOriginalPosition.position;
                 distractorObject.transform.rotation = distractorOriginalPosition.rotation;
+            }
+
+            // Disable interaction in Trial 1 (using XR Interaction Toolkit)
+            XRBaseInteractable interactable = distractorObject.GetComponent<XRBaseInteractable>();
+            if (interactable != null)
+            {
+                interactable.enabled = (currentTrial >= 2);
+            }
+
+            // Alternatively, disable collider if not using XR Interaction Toolkit
+            Collider distractorCollider = distractorObject.GetComponent<Collider>();
+            if (distractorCollider != null)
+            {
+                distractorCollider.enabled = (currentTrial >= 2);
             }
         }
 
