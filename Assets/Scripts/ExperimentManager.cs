@@ -85,15 +85,15 @@ public class ExperimentManager : MonoBehaviour
     private float gazeTimer = 0f;
 
     private static readonly string[] ColumnNames = {
-        "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation",
-        "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM",
-        "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio",
-        "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
-        "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
-        "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
-        "Trial", "MainObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
-        "Blinked"
-    };
+    "Frame", "CaptureTime", "LogTime", "HMDPosition", "HMDRotation",
+    "GazeStatus", "CombinedGazeForward", "CombinedGazePosition", "InterPupillaryDistanceInMM",
+    "LeftEyeStatus", "LeftEyeForward", "LeftEyePosition", "LeftPupilIrisDiameterRatio",
+    "LeftPupilDiameterInMM", "LeftIrisDiameterInMM", "RightEyeStatus", "RightEyeForward",
+    "RightEyePosition", "RightPupilIrisDiameterRatio", "RightPupilDiameterInMM",
+    "RightIrisDiameterInMM", "FocusDistance", "FocusStability",
+    "Trial", "MainObjectDetectionTime", "DistractorDetected", "DistractorDetectionTime",
+    "Blinked", "GroupNumber"
+};
 
     private const string ValidString = "VALID";
     private const string InvalidString = "INVALID";
@@ -152,7 +152,7 @@ public class ExperimentManager : MonoBehaviour
             EndExperiment();
         }
 
-        if(currentTrial>=2 && distractorFound)
+        if (currentTrial >= 2 && distractorFound)
         {
 
             StartCoroutine(ShowExperimentEndUI("Experiment Ended\n(You detected the right object! Thanks for playing)"));
@@ -248,7 +248,7 @@ public class ExperimentManager : MonoBehaviour
 
     void LogEyeTrackingData(float leftEyeOpenness, float rightEyeOpenness)
     {
-        string[] logData = new string[28];
+        string[] logData = new string[29];
 
         logData[0] = Time.frameCount.ToString();
         logData[1] = (DateTime.Now.Ticks / 100).ToString();
@@ -290,6 +290,8 @@ public class ExperimentManager : MonoBehaviour
         logData[25] = distractorFound.ToString();
         logData[26] = distractorDetectionTime.ToString("F3");
         logData[27] = (leftEyeOpenness < 0.1f && rightEyeOpenness < 0.1f) ? "1" : "0";
+        int groupNumber = PlayerPrefs.GetInt("SelectedGroup", 0); // Default to 0 if not set
+        logData[28] = groupNumber.ToString();
 
         Log(logData);
     }
@@ -556,12 +558,15 @@ public class ExperimentManager : MonoBehaviour
             return;
         }
 
+        int groupNumber = PlayerPrefs.GetInt("SelectedGroup", 0); // Default to 0 if not set
+
         string[] trialData = new string[]
         {
-            currentTrial.ToString(),
-            objectDetectionTime.ToString("F3"),
-            distractorFound.ToString(),
-            distractorDetectionTime.ToString("F3")
+        currentTrial.ToString(),
+        objectDetectionTime.ToString("F3"),
+        distractorFound.ToString(),
+        distractorDetectionTime.ToString("F3"),
+        groupNumber.ToString()  // Added group number
         };
 
         string trialDataString = string.Join(",", trialData);
