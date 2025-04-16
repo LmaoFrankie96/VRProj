@@ -356,8 +356,15 @@ public class ExperimentManager : MonoBehaviour
     {
         int randomIndex = UnityEngine.Random.Range(0, 2);
         Transform newPosition = randomIndex == 0 ? distractorPosition1 : distractorPosition2;
+
+        // Save the original rotation before changing position
+        Quaternion originalRotation = distractorObject.transform.rotation;
+
+        // Change position
         distractorObject.transform.position = newPosition.position;
-        distractorObject.transform.rotation = newPosition.rotation;
+
+        // Restore original rotation
+        distractorObject.transform.rotation = originalRotation;
     }
 
     public void SetDistractorInFrustum(bool isInFrustum)

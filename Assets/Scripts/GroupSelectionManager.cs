@@ -11,6 +11,7 @@ public class GroupSelectionManager : MonoBehaviour
     public Button group1Button;
     public Button group2Button;
     public Button group3Button;
+    public Button resetButton;
 
     [Header("Main UI Buttons")]
     public Button[] group1Buttons; // Buttons only for Group 1
@@ -41,6 +42,7 @@ public class GroupSelectionManager : MonoBehaviour
         group1Button.onClick.AddListener(() => SetGroup(1));
         group2Button.onClick.AddListener(() => SetGroup(2));
         group3Button.onClick.AddListener(() => SetGroup(3));
+        resetButton.onClick.AddListener(() => ResetGroupSelection());
     }
 
     void ShowGroupSelection()
