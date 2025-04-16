@@ -14,6 +14,7 @@ public class SceneManager : MonoBehaviour
     public Button prac2Button;
     public Button exp1Button;
     public Button exp2Button;
+    public Button exp3Button;
 
     void Start()
     {
@@ -35,6 +36,7 @@ public class SceneManager : MonoBehaviour
         if (prac2Button != null) prac2Button.onClick.AddListener(LoadPractice2);
         if (exp1Button != null) exp1Button.onClick.AddListener(LoadExperiment1);
         if (exp2Button != null) exp2Button.onClick.AddListener(LoadExperiment2);
+        if (exp2Button != null) exp3Button.onClick.AddListener(LoadExperiment3);
     }
 
     public void LoadExperiment1()
@@ -45,6 +47,9 @@ public class SceneManager : MonoBehaviour
     public void LoadExperiment2()
     {
         UnityEngine.SceneManagement.SceneManager.LoadScene("Experiment 2");
+    }public void LoadExperiment3()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Experiment 3");
     }
 
     public void LoadPractice1()
