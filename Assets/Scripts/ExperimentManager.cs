@@ -29,6 +29,7 @@ public class ExperimentManager : MonoBehaviour
     public float trial1Duration = 30f;
     public float trial2Duration = 45f;
     public float trial3Duration = 60f;
+    public float trial4Duration = 45f;
 
     [Header("UI Settings")]
     public GameObject trialEndUI;
@@ -426,6 +427,7 @@ public class ExperimentManager : MonoBehaviour
             1 => trial1Duration,
             2 => trial2Duration,
             3 => trial3Duration,
+            4 => trial4Duration, // Add this line
             _ => 30f
         };
 
@@ -501,8 +503,10 @@ public class ExperimentManager : MonoBehaviour
             if (currentTrial == 1)
                 trialEndText.text = $"Did you see anything unusual happening? Look for it!";
             else if (currentTrial == 2 && !distractorFound)
-                trialEndText.text = $"Something moves when you blink! Look for it and find it!";
+                trialEndText.text = $"Something is teleporting in the room. Look for it!";
             else if (currentTrial == 3 && !distractorFound)
+                trialEndText.text = $"Something teleports when you BLINK! Look for it and find it!";
+            else if (currentTrial == 4 && !distractorFound) // Add this line
                 trialEndText.text = $"You weren't able to find the object. Thanks for playing!";
         }
 
@@ -534,7 +538,7 @@ public class ExperimentManager : MonoBehaviour
     {
         currentTrial++;
 
-        if (currentTrial > 3)
+        if (currentTrial > 4) // Change from 3 to 4
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene(completionSceneName);
         }
